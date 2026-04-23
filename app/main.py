@@ -44,6 +44,16 @@ def custom_openapi() -> dict:
 app.openapi = custom_openapi
 
 
-@app.get("/health", tags=["health"])
+@app.get(
+    "/health",
+    tags=["health"],
+    summary="Verificar que la API esta activa",
+    description=(
+        "Endpoint liviano para confirmar que la aplicacion FastAPI esta levantada "
+        "y puede responder peticiones HTTP. No valida la conexion a PostgreSQL, "
+        "Google Cloud DLP ni Poppler."
+    ),
+    response_description="Estado basico de la aplicacion.",
+)
 def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
