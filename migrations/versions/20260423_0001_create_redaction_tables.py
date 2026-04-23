@@ -7,6 +7,7 @@ Create Date: 2026-04-23 13:00:00
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 
 revision = "20260423_0001"
@@ -15,8 +16,11 @@ branch_labels = None
 depends_on = None
 
 
-request_type = sa.Enum("single", "batch", name="request_type")
-processing_status = sa.Enum("PENDING", "PROCESSING", "COMPLETED", "FAILED", name="processing_status")
+request_type = postgresql.ENUM("single", "batch", name="request_type", create_type=True)
+processing_status = postgresql.ENUM("PENDING", "PROCESSING", "COMPLETED", "FAILED", name="processing_status", create_type=True)
+
+request_type_existing = postgresql.ENUM("single", "batch", name="request_type", create_type=False)
+processing_status_existing = postgresql.ENUM("PENDING", "PROCESSING", "COMPLETED", "FAILED", name="processing_status", create_type=False)
 
 
 def upgrade() -> None:
@@ -27,8 +31,8 @@ def upgrade() -> None:
     op.create_table(
         "redaction_requests",
         sa.Column("id", sa.Uuid(), nullable=False),
-        sa.Column("request_type", request_type, nullable=False),
-        sa.Column("status", processing_status, nullable=False),
+        sa.Column("request_type", request_type_existing, nullable=False),
+        sa.Column("status", processing_status_existing, nullable=False),
         sa.Column("requested_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
         sa.Column("started_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True),
@@ -47,7 +51,7 @@ def upgrade() -> None:
         sa.Column("stored_filename", sa.String(length=255), nullable=False),
         sa.Column("input_path", sa.Text(), nullable=False),
         sa.Column("output_path", sa.Text(), nullable=True),
-        sa.Column("status", processing_status, nullable=False),
+        sa.Column("status", processing_status_existing, nullable=False),
         sa.Column("requested_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
         sa.Column("started_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True),

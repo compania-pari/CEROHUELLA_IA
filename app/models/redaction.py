@@ -3,18 +3,33 @@ from datetime import datetime
 
 from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Text, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.dialects.postgresql import ENUM as PgEnum
 
 from app.core.enums import ProcessingStatus, RequestType
 from app.db.base import Base
+
+
+request_type_enum = PgEnum(
+    RequestType,
+    name="request_type",
+    create_type=False,
+    values_callable=lambda enum_class: [item.value for item in enum_class],
+)
+processing_status_enum = PgEnum(
+    ProcessingStatus,
+    name="processing_status",
+    create_type=False,
+    values_callable=lambda enum_class: [item.value for item in enum_class],
+)
 
 
 class RedactionRequest(Base):
     __tablename__ = "redaction_requests"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    request_type: Mapped[RequestType] = mapped_column(Enum(RequestType, name="request_type"), nullable=False)
+    request_type: Mapped[RequestType] = mapped_column(request_type_enum, nullable=False)
     status: Mapped[ProcessingStatus] = mapped_column(
-        Enum(ProcessingStatus, name="processing_status"),
+        processing_status_enum,
         nullable=False,
         default=ProcessingStatus.PENDING,
     )
@@ -48,7 +63,7 @@ class RedactionFile(Base):
     input_path: Mapped[str] = mapped_column(Text, nullable=False)
     output_path: Mapped[str | None] = mapped_column(Text)
     status: Mapped[ProcessingStatus] = mapped_column(
-        Enum(ProcessingStatus, name="processing_status"),
+        processing_status_enum,
         nullable=False,
         default=ProcessingStatus.PENDING,
     )
