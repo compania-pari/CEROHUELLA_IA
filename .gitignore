@@ -236,3 +236,4 @@ storage/*
 *secret*.json
 google-cloud*.json
 gcp*.json
+AGENTS.md

@@ -1,0 +1,37 @@
+name: cerohuella-ia-build-$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  pythonVersion: "3.12"
+
+steps:
+  - task: UsePythonVersion@0
+    displayName: "Usar Python $(pythonVersion)"
+    inputs:
+      versionSpec: "$(pythonVersion)"
+
+  - script: |
+      python -m pip install --upgrade pip setuptools wheel
+      python -m pip install -e .[dev]
+    displayName: "Instalar dependencias"
+
+  - script: |
+      python -c "import app.main; print('FastAPI app import ok')"
+    displayName: "Validar importacion de la API"
+
+  - script: |
+      pytest --junitxml=$(Common.TestResultsDirectory)/pytest-results.xml
+    displayName: "Ejecutar pruebas"
+
+  - task: PublishTestResults@2
+    displayName: "Publicar resultados de pruebas"
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFormat: JUnit
+      testResultsFiles: "$(Common.TestResultsDirectory)/*.xml"
+      failTaskOnFailedTests: true
+
