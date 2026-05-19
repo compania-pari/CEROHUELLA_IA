@@ -25,6 +25,10 @@ class Settings(BaseSettings):
         default=None,
         alias="GOOGLE_APPLICATION_CREDENTIALS_JSON",
     )
+    google_application_credentials_b64: str | None = Field(
+        default=None,
+        alias="GOOGLE_APPLICATION_CREDENTIALS_B64",
+    )
     google_application_credentials_path: Path = Field(
         default=Path("/tmp/google-application-credentials.json"),
         alias="GOOGLE_APPLICATION_CREDENTIALS_PATH",
