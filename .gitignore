@@ -205,3 +205,35 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# CeroHuella IA local runtime files
+storage/*
+!storage/.gitkeep
+!storage/input/
+!storage/input/.gitkeep
+!storage/output/
+!storage/output/.gitkeep
+!storage/tmp/
+!storage/tmp/.gitkeep
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.tif
+*.tiff
+
+# Local cloud credentials and secrets
+*.pem
+*.key
+*.p12
+*.pfx
+*service-account*.json
+*credentials*.json
+*secret*.json
+google-cloud*.json
+gcp*.json
+AGENTS.md

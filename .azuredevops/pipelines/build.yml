@@ -1,0 +1,80 @@
+name: cerohuella-ia-build-$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  branches:
+    include:
+      - main
+
+pr: none
+
+pool:
+  vmImage: ubuntu-24.04
+
+variables:
+  pythonVersion: "3.12"
+  azureServiceConnection: "sc-azure-cerohuella"
+  acrName: "acrcerohuella"
+  acrLoginServer: "acrcerohuella.azurecr.io"
+  imageRepository: "cerohuella-ia"
+  imageTag: "$(Build.BuildId)"
+
+steps:
+  - task: UsePythonVersion@0
+    displayName: "Usar Python $(pythonVersion)"
+    inputs:
+      versionSpec: "$(pythonVersion)"
+
+  - script: |
+      python -m pip install --upgrade pip setuptools wheel
+      python -m pip install -e .[dev]
+    displayName: "Instalar dependencias"
+
+  - script: |
+      python -c "import app.main; print('FastAPI app import ok')"
+    displayName: "Validar importacion de la API"
+
+  - script: |
+      pytest --junitxml=$(Common.TestResultsDirectory)/pytest-results.xml
+    displayName: "Ejecutar pruebas"
+
+  - task: PublishTestResults@2
+    displayName: "Publicar resultados de pruebas"
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFormat: JUnit
+      testResultsFiles: "$(Common.TestResultsDirectory)/*.xml"
+      failTaskOnFailedTests: true
+
+  - task: AzureCLI@2
+    displayName: "Construir y publicar imagen Docker"
+    inputs:
+      azureSubscription: "$(azureServiceConnection)"
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -euo pipefail
+        az acr login --name "$(acrName)"
+        docker build \
+          --tag "$(acrLoginServer)/$(imageRepository):$(imageTag)" \
+          --tag "$(acrLoginServer)/$(imageRepository):latest" \
+          .
+        docker push "$(acrLoginServer)/$(imageRepository):$(imageTag)"
+        docker push "$(acrLoginServer)/$(imageRepository):latest"
+
+  - script: |
+      mkdir -p "$(Build.ArtifactStagingDirectory)/deploy"
+      cat > "$(Build.ArtifactStagingDirectory)/deploy/image.env" <<EOF
+      ACR_NAME=$(acrName)
+      ACR_LOGIN_SERVER=$(acrLoginServer)
+      IMAGE_REPOSITORY=$(imageRepository)
+      IMAGE_TAG=$(imageTag)
+      IMAGE_FULL_NAME=$(acrLoginServer)/$(imageRepository):$(imageTag)
+      EOF
+    displayName: "Generar metadata de despliegue"
+
+  - task: PublishPipelineArtifact@1
+    displayName: "Publicar artifact de despliegue"
+    inputs:
+      targetPath: "$(Build.ArtifactStagingDirectory)/deploy"
+      artifact: "drop"
+      publishLocation: "pipeline"
