@@ -3,9 +3,11 @@ from fastapi.openapi.utils import get_openapi
 
 from app.api.v1.redactions import router as redactions_router
 from app.core.config import get_settings
+from app.core.gcp_credentials import configure_google_application_credentials
 
 
 settings = get_settings()
+configure_google_application_credentials(settings)
 
 app = FastAPI(
     title=settings.app_name,

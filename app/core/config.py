@@ -21,6 +21,14 @@ class Settings(BaseSettings):
         alias="DATABASE_URL",
     )
     google_cloud_project_id: str = Field(default="dummy-project", alias="GOOGLE_CLOUD_PROJECT_ID")
+    google_application_credentials_json: str | None = Field(
+        default=None,
+        alias="GOOGLE_APPLICATION_CREDENTIALS_JSON",
+    )
+    google_application_credentials_path: Path = Field(
+        default=Path("/tmp/google-application-credentials.json"),
+        alias="GOOGLE_APPLICATION_CREDENTIALS_PATH",
+    )
     storage_root: Path = Field(default=Path("storage"), alias="STORAGE_ROOT")
     max_file_size_mb: int = Field(default=25, alias="MAX_FILE_SIZE_MB")
     max_batch_files: int = Field(default=10, alias="MAX_BATCH_FILES")
