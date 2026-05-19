@@ -12,7 +12,7 @@ configure_google_application_credentials(settings)
 app = FastAPI(
     title=settings.app_name,
     version="0.1.0",
-    description="API para anonimizar PDFs y auditar solicitudes.",
+    description="API para anonimizar PDFs y auditar solicitudes realizadas.",
 )
 app.openapi_version = "3.0.3"
 
