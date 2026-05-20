@@ -237,3 +237,4 @@ storage/*
 google-cloud*.json
 gcp*.json
 AGENTS.md
+contexto.md
