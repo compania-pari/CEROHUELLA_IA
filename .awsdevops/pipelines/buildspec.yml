@@ -24,14 +24,19 @@ phases:
 
   build:
     commands:
-      - IMAGE_TAG=$CODEBUILD_BUILD_NUMBER
-      - IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPOSITORY
+      - export IMAGE_TAG=$CODEBUILD_BUILD_NUMBER
+      - export IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPOSITORY
       - docker build --tag $IMAGE_URI:$IMAGE_TAG --tag $IMAGE_URI:latest .
       - docker push $IMAGE_URI:$IMAGE_TAG
       - docker push $IMAGE_URI:latest
 
   post_build:
     commands:
+      - |
+        if [ "$CODEBUILD_BUILD_SUCCEEDING" -ne 1 ]; then
+          echo "Build failed; skipping image artifact export and ECS deployment."
+          exit 1
+        fi
       - mkdir -p $IMAGE_ARTIFACT_DIR
       - docker save $IMAGE_URI:$IMAGE_TAG | gzip > $IMAGE_ARTIFACT_DIR/$IMAGE_REPOSITORY-$IMAGE_TAG.tar.gz
       - |
