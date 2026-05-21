@@ -5,6 +5,8 @@ env:
     AWS_ACCOUNT_ID: "056639708411"
     IMAGE_REPOSITORY: "cerohuella-ia"
     IMAGE_ARTIFACT_DIR: "artifacts"
+    ECS_CLUSTER: "default"
+    ECS_SERVICE: "ecs-cerohuella-ia-dev"
 
 phases:
   install:
@@ -40,7 +42,11 @@ phases:
         IMAGE_TAG=$IMAGE_TAG
         IMAGE_URI=$IMAGE_URI:$IMAGE_TAG
         IMAGE_ARTIFACT=$IMAGE_REPOSITORY-$IMAGE_TAG.tar.gz
+        ECS_CLUSTER=$ECS_CLUSTER
+        ECS_SERVICE=$ECS_SERVICE
         EOF
+      - aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
+      - aws ecs wait services-stable --cluster $ECS_CLUSTER --services $ECS_SERVICE
 
 artifacts:
   files:
