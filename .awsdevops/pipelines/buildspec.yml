@@ -1,0 +1,48 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_ACCOUNT_ID: "056639708411"
+    IMAGE_REPOSITORY: "cerohuella-ia"
+    IMAGE_ARTIFACT_DIR: "artifacts"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.12
+    commands:
+      - python -m pip install --upgrade pip setuptools wheel
+      - python -m pip install -e .[dev]
+
+  pre_build:
+    commands:
+      - python -c "import app.main; print('FastAPI app import ok')"
+      - pytest --junitxml=pytest-results.xml
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+
+  build:
+    commands:
+      - IMAGE_TAG=$CODEBUILD_BUILD_NUMBER
+      - IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPOSITORY
+      - docker build --tag $IMAGE_URI:$IMAGE_TAG --tag $IMAGE_URI:latest .
+      - docker push $IMAGE_URI:$IMAGE_TAG
+      - docker push $IMAGE_URI:latest
+
+  post_build:
+    commands:
+      - mkdir -p $IMAGE_ARTIFACT_DIR
+      - docker save $IMAGE_URI:$IMAGE_TAG | gzip > $IMAGE_ARTIFACT_DIR/$IMAGE_REPOSITORY-$IMAGE_TAG.tar.gz
+      - |
+        cat > $IMAGE_ARTIFACT_DIR/image.env <<EOF
+        AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID
+        AWS_REGION=$AWS_DEFAULT_REGION
+        IMAGE_REPOSITORY=$IMAGE_REPOSITORY
+        IMAGE_TAG=$IMAGE_TAG
+        IMAGE_URI=$IMAGE_URI:$IMAGE_TAG
+        IMAGE_ARTIFACT=$IMAGE_REPOSITORY-$IMAGE_TAG.tar.gz
+        EOF
+
+artifacts:
+  files:
+    - pytest-results.xml
+    - artifacts/**/*
