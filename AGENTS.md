@@ -109,10 +109,21 @@ Recursos actuales aplicados:
   - Log Analytics: `law-cerohuella-dev-eus2`
   - Application Insights: `appi-cerohuella-dev-eus2`
   - Observabilidad: alertas basicas de API, Container App y PostgreSQL creadas por Terraform.
+- QA:
+  - Resource group: `rg-cerohuella-qa`
+  - Region runtime: `eastus2`
+  - Container App: `ca-cerohuella-api-qa`
+  - URL QA: `https://ca-cerohuella-api-qa.gentleriver-3e399988.eastus2.azurecontainerapps.io`
+  - Health QA: `https://ca-cerohuella-api-qa.gentleriver-3e399988.eastus2.azurecontainerapps.io/health`
+  - PostgreSQL Flexible Server: `psql-cerohuella-qa`
+  - Database: `cerohuella`
+  - Log Analytics: `law-cerohuella-qa`
+  - Application Insights: `appi-cerohuella-qa`
+  - Observabilidad: alertas basicas de API, Container App y PostgreSQL creadas por Terraform.
+  - Para mantener costos/cuotas academicas, QA reutiliza el Container Apps Environment `cae-cerohuella-dev` y se conecta a PostgreSQL QA con VNet peering y Private DNS link.
 
 Ambientes pendientes:
 
-- `qa`: no aplicar sin confirmacion explicita del usuario.
 - `prod`: no aplicar sin confirmacion explicita del usuario.
 
 ## Lecciones Aprendidas GitHub + Terraform + Azure
@@ -129,8 +140,10 @@ Ambientes pendientes:
 - Antes del primer `terraform apply` de un ambiente con Container App, asegurar que exista la imagen referenciada en ACR. Para dev se publico `cerohuella-ia:latest`.
 - Si `az acr build` falla localmente por `UnicodeEncodeError` al transmitir logs en Windows, revisar el resultado con `az acr task list-runs` y validar tags con `az acr repository show-tags`.
 - Si Azure deja un Container App en `ProvisioningState=Failed`, Terraform puede no importarlo porque Azure bloquea la lectura de secretos con error `ResourceNotProvisioned`. En ese caso, si el recurso no tiene revision lista ni FQDN, pedir confirmacion y eliminar solo ese Container App fallido antes de relanzar `terraform apply`.
+- En esta suscripcion academica, Azure devolvio `MaxNumberOfRegionalEnvironmentsInSubExceeded`: no permite mas de 1 Container Apps Environment en `eastus2`. Para QA se reutilizo el CAE de DEV y se agrego VNet peering + Private DNS link hacia PostgreSQL QA.
+- Si un ambiente reutiliza un CAE compartido, validar el `/health` y recordar que los logs de sistema del Container Apps Environment pertenecen al workspace asociado al CAE compartido; la telemetria de aplicacion sigue yendo a Application Insights del ambiente.
 - No borrar ni recrear recursos cloud sin confirmacion explicita del usuario. En DEV se elimino solamente `ca-cerohuella-api-dev` en estado fallido y luego Terraform lo recreo correctamente.
-- Al validar DEV, confirmar tres cosas: workflow Terraform exitoso, recurso Azure `Succeeded/Running`, y `/health` con `HTTP 200`.
+- Al validar DEV o QA, confirmar tres cosas: workflow Terraform exitoso, recurso Azure `Succeeded/Running`, y `/health` con `HTTP 200`.
 - Despues de cada cambio documental o de infraestructura, actualizar `tareas.md` y subir el commit al PR para mantener trazabilidad.
 
 ## Despliegue Azure DevOps Historico

@@ -288,8 +288,17 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 - [x] Verificacion `dev` contra `/health`.
   - URL: `https://ca-cerohuella-api-dev.gentleriver-3e399988.eastus2.azurecontainerapps.io/health`.
   - Resultado: `HTTP 200` con `{"status":"ok"}`.
-- [ ] Ambiente `qa` aplicado con Terraform.
-  - Pendiente de confirmacion del usuario por tiempo/costos.
+- [x] Ambiente `qa` aplicado con Terraform.
+  - Resource group: `rg-cerohuella-qa`.
+  - Container App: `ca-cerohuella-api-qa`.
+  - PostgreSQL Flexible Server: `psql-cerohuella-qa`.
+  - Log Analytics: `law-cerohuella-qa`.
+  - Application Insights: `appi-cerohuella-qa`.
+  - Alertas basicas de Azure Monitor creadas para API y PostgreSQL.
+  - Por cuota/costo academico, QA reutiliza el Container Apps Environment `cae-cerohuella-dev` y se conecta a PostgreSQL QA mediante VNet peering y Private DNS link.
+- [x] Verificacion `qa` contra `/health`.
+  - URL: `https://ca-cerohuella-api-qa.gentleriver-3e399988.eastus2.azurecontainerapps.io/health`.
+  - Resultado: `HTTP 200` con `{"status":"ok"}`.
 - [ ] Ambiente `prod` aplicado con Terraform.
   - Pendiente de confirmacion del usuario por tiempo/costos.
 
@@ -310,14 +319,19 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 - [x] GitHub Actions ejecuta CI correctamente.
 - [ ] GitHub Actions despliega `dev -> qa -> prod` con aprobaciones.
 - [x] Imagen Docker se publica en ACR para `dev`.
-- [ ] Imagen Docker se publica/promueve para `qa` y `prod`.
+- [x] Imagen Docker se reutiliza desde ACR para `qa`.
+- [ ] Imagen Docker se publica/promueve para `prod`.
 - [x] Container App responde `/health` en `dev`.
-- [ ] Container App responde `/health` en `qa` y `prod`.
+- [x] Container App responde `/health` en `qa`.
+- [ ] Container App responde `/health` en `prod`.
 - [x] PostgreSQL nuevo queda provisionado para `dev`.
-- [ ] PostgreSQL nuevo queda provisionado para `qa` y `prod`.
+- [x] PostgreSQL nuevo queda provisionado para `qa`.
+- [ ] PostgreSQL nuevo queda provisionado para `prod`.
 - [x] Observabilidad basica creada en Azure Monitor/Application Insights para `dev`.
-- [ ] Observabilidad basica creada en Azure Monitor/Application Insights para `qa` y `prod`.
+- [x] Observabilidad basica creada en Azure Monitor/Application Insights para `qa`.
+- [ ] Observabilidad basica creada en Azure Monitor/Application Insights para `prod`.
 - [x] Alertas basicas creadas para `dev`.
-- [ ] Alertas basicas creadas para `qa` y `prod`.
+- [x] Alertas basicas creadas para `qa`.
+- [ ] Alertas basicas creadas para `prod`.
 - [x] Documentacion operativa completa.
 - [x] Codigo publicado en `compania-pari/CEROHUELLA_IA`.
