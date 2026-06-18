@@ -72,6 +72,8 @@ El ACR compartido y el backend Terraform pueden mantenerse en `eastus` porque ya
 
 Nota operativa: el resource group `dev` puede permanecer con metadata en `eastus` si ya existe de un apply parcial. Los recursos de runtime de `dev` se crean en `eastus2`.
 
+Nota operativa adicional: si un workspace Log Analytics fue eliminado al mover `dev` de `eastus` a `eastus2`, Azure lo conserva temporalmente en soft-delete. En ese caso se debe usar un nombre nuevo, por ejemplo `law-cerohuella-dev-eus2`, o purgar explicitamente el workspace eliminado antes de reutilizar el nombre.
+
 Decision pendiente solo si aparece una restriccion de latencia, disponibilidad o costo: evaluar `brazilsouth` como alternativa para usuarios en Peru. Para esta etapa se prioriza simplicidad operativa.
 
 ## Grupos de recursos

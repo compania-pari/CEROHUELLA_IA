@@ -101,7 +101,7 @@ variable "postgresql_subnet_prefixes" {
 variable "log_analytics_name" {
   description = "Log Analytics workspace name."
   type        = string
-  default     = "law-cerohuella-dev"
+  default     = "law-cerohuella-dev-eus2"
 }
 
 variable "log_retention_days" {
@@ -113,7 +113,7 @@ variable "log_retention_days" {
 variable "application_insights_name" {
   description = "Application Insights name."
   type        = string
-  default     = "appi-cerohuella-dev"
+  default     = "appi-cerohuella-dev-eus2"
 }
 
 variable "container_apps_environment_name" {
