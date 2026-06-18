@@ -11,6 +11,7 @@ infra/terraform/
     README.md
   modules/
   envs/
+    shared/
     dev/
     qa/
     prod/
@@ -40,9 +41,12 @@ Cada ambiente usara un archivo de estado separado:
 
 | Ambiente | State key |
 | --- | --- |
+| `shared` | `envs/shared/terraform.tfstate` |
 | `dev` | `envs/dev/terraform.tfstate` |
 | `qa` | `envs/qa/terraform.tfstate` |
 | `prod` | `envs/prod/terraform.tfstate` |
+
+Aplicar primero `shared`, porque crea el ACR compartido. Luego usar sus outputs `acr_id` y `acr_login_server` para completar los `*.tfvars` reales de `dev`, `qa` y `prod`.
 
 ## Comandos base
 

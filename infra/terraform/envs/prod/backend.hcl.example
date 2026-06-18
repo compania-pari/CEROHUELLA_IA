@@ -1,0 +1,5 @@
+resource_group_name  = "rg-cerohuella-tfstate"
+storage_account_name = "stcerohuellatf<suffix>"
+container_name       = "tfstate"
+key                  = "envs/prod/terraform.tfstate"
+

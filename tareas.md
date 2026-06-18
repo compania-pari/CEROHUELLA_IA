@@ -78,17 +78,23 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 ## Fase 4 - Ambientes Terraform
 
-- [ ] Crear `infra/terraform/envs/dev`.
-- [ ] Crear `infra/terraform/envs/qa`.
-- [ ] Crear `infra/terraform/envs/prod`.
-- [ ] Crear variables comunes y especificas por ambiente.
-- [ ] Crear archivos `*.tfvars.example` sin secretos reales.
-- [ ] Configurar backend remoto separado por ambiente.
-- [ ] Validar `terraform fmt`.
-- [ ] Validar `terraform validate`.
-- [ ] Generar `terraform plan` para `dev`.
-- [ ] Generar `terraform plan` para `qa`.
-- [ ] Generar `terraform plan` para `prod`.
+- [x] Crear `infra/terraform/envs/dev`.
+- [x] Crear `infra/terraform/envs/qa`.
+- [x] Crear `infra/terraform/envs/prod`.
+  - Tambien se creo `infra/terraform/envs/shared` para el ACR compartido.
+- [x] Crear variables comunes y especificas por ambiente.
+- [x] Crear archivos `*.tfvars.example` sin secretos reales.
+- [x] Configurar backend remoto separado por ambiente.
+  - Se agregaron `backend.hcl.example` con keys separadas por ambiente.
+- [x] Validar `terraform fmt`.
+- [x] Validar `terraform validate`.
+  - Validado `shared`, `dev`, `qa` y `prod` con `terraform init -backend=false` y `terraform validate`.
+- [x] Generar `terraform plan` para `dev`.
+  - Validado en copia temporal sin backend remoto, usando `dev.tfvars.example` con placeholders.
+- [x] Generar `terraform plan` para `qa`.
+  - Validado en copia temporal sin backend remoto, usando `qa.tfvars.example` con placeholders.
+- [x] Generar `terraform plan` para `prod`.
+  - Validado en copia temporal sin backend remoto, usando `prod.tfvars.example` con placeholders.
 
 ## Fase 5 - PostgreSQL y migraciones
 
@@ -226,7 +232,7 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 - [ ] Confirmar rama de trabajo.
 - [ ] Preparar commit con alcance claro.
 - [ ] Subir rama a `compania-pari/CEROHUELLA_IA`.
-- [ ] Crear pull request con `gh pr create`.
+- [ ] Crear pull request con el plugin `@github`.
 - [ ] Incluir resumen, pruebas ejecutadas y riesgos residuales.
 - [ ] Solicitar revision antes de aplicar infraestructura real si corresponde.
 

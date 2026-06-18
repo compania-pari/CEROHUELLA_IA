@@ -1,0 +1,15 @@
+environment                          = "dev"
+location                             = "eastus"
+resource_group_name                  = "rg-cerohuella-dev"
+acr_id                               = "/subscriptions/<subscription-id>/resourceGroups/rg-cerohuella-shared/providers/Microsoft.ContainerRegistry/registries/acrcerohuellashared"
+acr_login_server                     = "acrcerohuellashared.azurecr.io"
+image_repository                     = "cerohuella-ia"
+image_tag                            = "latest"
+google_cloud_project_id              = "<google-project-id>"
+google_application_credentials_b64   = "<base64-service-account-json>"
+postgres_admin_login                 = "lpari"
+postgres_admin_password              = "<postgres-admin-password>"
+create_action_group                  = false
+alert_email_receivers                = {}
+alert_webhook_receivers              = {}
+
