@@ -237,13 +237,20 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 ## Fase 14 - Validacion local
 
-- [ ] Ejecutar `pytest`.
-- [ ] Ejecutar build Docker local si aplica.
-- [ ] Ejecutar `terraform fmt -check`.
-- [ ] Ejecutar `terraform validate`.
-- [ ] Generar plan Terraform para `dev`.
-- [ ] Revisar que no haya secretos en cambios con `git diff`.
-- [ ] Revisar archivos nuevos con `git status`.
+- [x] Ejecutar `pytest`.
+  - Resultado: 12 pruebas pasaron.
+- [x] Ejecutar build Docker local si aplica.
+  - Resultado: no ejecutado localmente porque `docker` no esta disponible en el PATH de esta sesion. El build queda cubierto por GitHub Actions.
+- [x] Ejecutar `terraform fmt -check`.
+  - Resultado: `terraform fmt -check -recursive infra\terraform` paso correctamente.
+- [x] Ejecutar `terraform validate`.
+  - Resultado: `shared`, `dev`, `qa` y `prod` validaron correctamente con `terraform init -backend=false`.
+- [x] Generar plan Terraform para `dev`.
+  - Resultado: plan validado en copia temporal sin backend remoto y con `dev.tfvars.example`; 24 recursos a crear.
+- [x] Revisar que no haya secretos en cambios con `git diff`.
+  - Resultado: `git diff --check` paso y busqueda de patrones sensibles no encontro secretos reales.
+- [x] Revisar archivos nuevos con `git status`.
+  - Resultado: solo archivos ignorados locales como `.env`, `.terraform`, caches y PDFs procesados permanecen fuera de Git.
 
 ## Fase 15 - Publicacion en GitHub
 
