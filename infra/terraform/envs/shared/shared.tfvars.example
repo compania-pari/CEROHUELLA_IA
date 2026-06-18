@@ -1,0 +1,7 @@
+location            = "eastus"
+resource_group_name = "rg-cerohuella-shared"
+acr_name            = "acrcerohuellashared"
+acr_sku             = "Basic"
+owner               = "lpari"
+cost_center         = "dmc"
+

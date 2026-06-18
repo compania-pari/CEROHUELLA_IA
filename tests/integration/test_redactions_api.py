@@ -1,6 +1,14 @@
 import io
 
 
+def test_healthcheck_returns_request_id(client):
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+    assert response.headers["x-request-id"]
+
+
 def test_single_redaction_flow(client, pdf_bytes):
     response = client.post(
         "/api/v1/redactions/single",

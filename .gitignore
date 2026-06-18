@@ -45,6 +45,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+pytest-results.xml
 *.cover
 *.py.cover
 .hypothesis/
@@ -236,5 +237,20 @@ storage/*
 *secret*.json
 google-cloud*.json
 gcp*.json
+
+# Terraform local state and sensitive variable files
+**/.terraform/
+infra/terraform/modules/**/.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
 #AGENTS.md
 contexto.md

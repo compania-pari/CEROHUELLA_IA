@@ -36,6 +36,11 @@ class Settings(BaseSettings):
     storage_root: Path = Field(default=Path("storage"), alias="STORAGE_ROOT")
     max_file_size_mb: int = Field(default=25, alias="MAX_FILE_SIZE_MB")
     max_batch_files: int = Field(default=10, alias="MAX_BATCH_FILES")
+    applicationinsights_connection_string: str | None = Field(
+        default=None,
+        alias="APPLICATIONINSIGHTS_CONNECTION_STRING",
+    )
+    otel_service_name: str | None = Field(default=None, alias="OTEL_SERVICE_NAME")
 
     @property
     def max_file_size_bytes(self) -> int:
