@@ -138,16 +138,18 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 ## Fase 7 - Workflow CI
 
-- [ ] Crear `.github/workflows/ci.yml`.
-- [ ] Ejecutar checkout.
-- [ ] Configurar Python 3.12.
-- [ ] Instalar dependencias con `python -m pip install -e .[dev]`.
-- [ ] Validar importacion de FastAPI.
-- [ ] Ejecutar `pytest`.
-- [ ] Publicar resultados JUnit.
-- [ ] Construir imagen Docker.
-- [ ] Ejecutar escaneo basico de imagen con Trivy.
-- [ ] Publicar resumen del build.
+- [x] Crear `.github/workflows/ci.yml`.
+- [x] Ejecutar checkout.
+- [x] Configurar Python 3.12.
+- [x] Instalar dependencias con `python -m pip install -e .[dev]`.
+- [x] Validar importacion de FastAPI.
+- [x] Ejecutar `pytest`.
+- [x] Publicar resultados JUnit.
+  - Publicado como artifact `pytest-results`.
+- [x] Construir imagen Docker.
+- [x] Ejecutar escaneo basico de imagen con Trivy.
+  - Publicado como artifact `security-reports`; inicialmente no bloqueante.
+- [x] Publicar resumen del build.
 
 ## Fase 8 - Workflow Terraform
 
