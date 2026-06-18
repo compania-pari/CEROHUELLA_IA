@@ -226,7 +226,7 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 - [x] Crear `docs/terraform-azure.md`.
 - [x] Crear `docs/observabilidad-azure.md`.
 - [x] Actualizar `README.md` con resumen del nuevo flujo.
-- [ ] Documentar comandos operativos:
+- [x] Documentar comandos operativos:
   - [x] Bootstrap Terraform.
   - [x] Plan/apply por ambiente.
   - [x] Ejecucion CI.
@@ -254,12 +254,21 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 ## Fase 15 - Publicacion en GitHub
 
-- [ ] Confirmar rama de trabajo.
-- [ ] Preparar commit con alcance claro.
-- [ ] Subir rama a `compania-pari/CEROHUELLA_IA`.
-- [ ] Crear pull request con el plugin `@github`.
-- [ ] Incluir resumen, pruebas ejecutadas y riesgos residuales.
-- [ ] Solicitar revision antes de aplicar infraestructura real si corresponde.
+- [x] Confirmar rama de trabajo.
+  - Rama: `codex/github-azure-terraform-cicd`.
+- [x] Preparar commit con alcance claro.
+  - Trabajo separado en commits por fase: Terraform, workflows, observabilidad, seguridad, documentacion y validacion.
+- [x] Subir rama a `compania-pari/CEROHUELLA_IA`.
+  - Se publico `develop` como rama base porque el repositorio GitHub estaba vacio.
+  - Se publico `codex/github-azure-terraform-cicd` con tracking remoto.
+- [x] Crear pull request con el plugin `@github`.
+  - El conector `@github` devolvio `403 Resource not accessible by integration` al crear PR.
+  - PR creado con `gh` autenticado como fallback autorizado en la sesion: https://github.com/compania-pari/CEROHUELLA_IA/pull/1
+- [x] Incluir resumen, pruebas ejecutadas y riesgos residuales.
+  - Incluido en el cuerpo del PR.
+- [x] Solicitar revision antes de aplicar infraestructura real si corresponde.
+  - PR creado como draft para revision previa. No se ejecuto `terraform apply` ni se crearon recursos Azure reales.
+  - Checks GitHub iniciales: CI exitoso y Terraform `fmt/validate` exitoso en `shared`, `dev`, `qa` y `prod`.
 
 ## Preguntas no bloqueantes para decidir durante la implementacion
 
@@ -274,13 +283,13 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 ## Criterios de terminado
 
-- [ ] Infraestructura nueva definida en Terraform y validada.
-- [ ] GitHub Actions ejecuta CI correctamente.
+- [x] Infraestructura nueva definida en Terraform y validada.
+- [x] GitHub Actions ejecuta CI correctamente.
 - [ ] GitHub Actions despliega `dev -> qa -> prod` con aprobaciones.
 - [ ] Imagen Docker se publica en ACR.
 - [ ] Container App responde `/health` por ambiente.
 - [ ] PostgreSQL nuevo queda provisionado y conectado.
 - [ ] Observabilidad basica visible en Azure Monitor/Application Insights.
 - [ ] Alertas basicas creadas.
-- [ ] Documentacion operativa completa.
-- [ ] Codigo publicado en `compania-pari/CEROHUELLA_IA`.
+- [x] Documentacion operativa completa.
+- [x] Codigo publicado en `compania-pari/CEROHUELLA_IA`.
