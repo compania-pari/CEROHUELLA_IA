@@ -30,14 +30,19 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 ## Fase 1 - Diseno de arquitectura Azure
 
-- [ ] Definir convencion de nombres para recursos por ambiente: `dev`, `qa`, `prod`.
-- [ ] Definir region Azure principal.
-- [ ] Definir grupos de recursos por ambiente o grupo compartido mas recursos por ambiente.
-- [ ] Definir estrategia de ACR: compartido entre ambientes o ACR por ambiente.
-- [ ] Definir estrategia PostgreSQL: servidor por ambiente o servidor compartido con bases separadas.
-- [ ] Definir estrategia de secretos: GitHub Environments + Container App secrets.
-- [ ] Definir tags obligatorios: proyecto, ambiente, owner, managedBy, costo.
-- [ ] Documentar la excepcion OECE: Python/FastAPI + IA/DLP fuera de pila Java/Angular/Oracle, sustentada por el dominio de IA y procesamiento PDF.
+- [x] Definir convencion de nombres para recursos por ambiente: `dev`, `qa`, `prod`.
+  - Documentado en `docs/arquitectura-azure.md`.
+- [x] Definir region Azure principal.
+  - Decision inicial: `eastus`.
+- [x] Definir grupos de recursos por ambiente o grupo compartido mas recursos por ambiente.
+  - Decision inicial: `rg-cerohuella-shared` y `rg-cerohuella-{env}`.
+- [x] Definir estrategia de ACR: compartido entre ambientes o ACR por ambiente.
+  - Decision inicial: ACR compartido `acrcerohuellashared`.
+- [x] Definir estrategia PostgreSQL: servidor por ambiente o servidor compartido con bases separadas.
+  - Decision inicial: PostgreSQL Flexible Server por ambiente.
+- [x] Definir estrategia de secretos: GitHub Environments + Container App secrets.
+- [x] Definir tags obligatorios: proyecto, ambiente, owner, managedBy, costo.
+- [x] Documentar la excepcion OECE: Python/FastAPI + IA/DLP fuera de pila Java/Angular/Oracle, sustentada por el dominio de IA y procesamiento PDF.
 
 ## Fase 2 - Bootstrap Terraform
 
@@ -219,9 +224,12 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 ## Preguntas no bloqueantes para decidir durante la implementacion
 
-- [ ] Definir si `dev` se despliega desde `develop` y `prod` desde `main`, o si se usa `main` con promocion manual.
-- [ ] Definir si ACR sera compartido o uno por ambiente.
-- [ ] Definir si PostgreSQL sera servidor por ambiente o servidor unico con bases por ambiente.
+- [x] Definir si `dev` se despliega desde `develop` y `prod` desde `main`, o si se usa `main` con promocion manual.
+  - Decision inicial: `develop` despliega a `dev`; `main` promueve a `qa` y `prod` con aprobaciones.
+- [x] Definir si ACR sera compartido o uno por ambiente.
+  - Decision inicial: ACR compartido.
+- [x] Definir si PostgreSQL sera servidor por ambiente o servidor unico con bases por ambiente.
+  - Decision inicial: servidor por ambiente.
 - [ ] Definir si las alertas notificaran por correo, webhook, Teams u otro canal.
 - [ ] Definir presupuesto/cotas para evitar costos inesperados.
 
