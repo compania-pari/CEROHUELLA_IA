@@ -208,7 +208,7 @@ variable "google_application_credentials_path" {
 variable "postgresql_server_name" {
   description = "PostgreSQL Flexible Server name."
   type        = string
-  default     = "psql-cerohuella-dev"
+  default     = "psql-cerohuella-dev-eus2"
 }
 
 variable "postgresql_private_dns_zone_name" {

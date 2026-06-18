@@ -74,6 +74,8 @@ Nota operativa: el resource group `dev` puede permanecer con metadata en `eastus
 
 Nota operativa adicional: si un workspace Log Analytics fue eliminado al mover `dev` de `eastus` a `eastus2`, Azure lo conserva temporalmente en soft-delete. En ese caso se debe usar un nombre nuevo, por ejemplo `law-cerohuella-dev-eus2`, o purgar explicitamente el workspace eliminado antes de reutilizar el nombre.
 
+La misma precaucion aplica a nombres de PostgreSQL Flexible Server reservados por intentos fallidos. Para `dev`, si `psql-cerohuella-dev` queda retenido por Azure, usar `psql-cerohuella-dev-eus2`.
+
 Decision pendiente solo si aparece una restriccion de latencia, disponibilidad o costo: evaluar `brazilsouth` como alternativa para usuarios en Peru. Para esta etapa se prioriza simplicidad operativa.
 
 ## Grupos de recursos
