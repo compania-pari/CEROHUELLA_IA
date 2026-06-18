@@ -33,7 +33,7 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 - [x] Definir convencion de nombres para recursos por ambiente: `dev`, `qa`, `prod`.
   - Documentado en `docs/arquitectura-azure.md`.
 - [x] Definir region Azure principal.
-  - Decision inicial: `eastus`.
+  - Decision inicial ajustada: `eastus2` para runtime por restriccion `LocationIsOfferRestricted` de PostgreSQL Flexible Server en `eastus`.
 - [x] Definir grupos de recursos por ambiente o grupo compartido mas recursos por ambiente.
   - Decision inicial: `rg-cerohuella-shared` y `rg-cerohuella-{env}`.
 - [x] Definir estrategia de ACR: compartido entre ambientes o ACR por ambiente.

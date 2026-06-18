@@ -5,9 +5,15 @@ variable "environment" {
 }
 
 variable "location" {
-  description = "Azure region."
+  description = "Azure region for environment resources."
   type        = string
-  default     = "eastus"
+  default     = "eastus2"
+}
+
+variable "resource_group_location" {
+  description = "Azure region used to store resource group metadata."
+  type        = string
+  default     = "eastus2"
 }
 
 variable "resource_group_name" {

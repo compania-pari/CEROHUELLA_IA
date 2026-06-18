@@ -1,7 +1,7 @@
 module "resource_group" {
   source   = "../../modules/resource_group"
   name     = var.resource_group_name
-  location = var.location
+  location = var.resource_group_location
   tags     = local.common_tags
 }
 
@@ -9,7 +9,7 @@ module "network" {
   source                         = "../../modules/network"
   virtual_network_name           = var.virtual_network_name
   resource_group_name            = module.resource_group.name
-  location                       = module.resource_group.location
+  location                       = var.location
   address_space                  = var.address_space
   container_apps_subnet_name     = var.container_apps_subnet_name
   container_apps_subnet_prefixes = var.container_apps_subnet_prefixes
@@ -22,7 +22,7 @@ module "log_analytics" {
   source              = "../../modules/log_analytics"
   name                = var.log_analytics_name
   resource_group_name = module.resource_group.name
-  location            = module.resource_group.location
+  location            = var.location
   retention_in_days   = var.log_retention_days
   tags                = local.common_tags
 }
@@ -31,7 +31,7 @@ module "application_insights" {
   source              = "../../modules/application_insights"
   name                = var.application_insights_name
   resource_group_name = module.resource_group.name
-  location            = module.resource_group.location
+  location            = var.location
   workspace_id        = module.log_analytics.id
   tags                = local.common_tags
 }
@@ -40,7 +40,7 @@ module "container_apps_environment" {
   source                     = "../../modules/container_apps_environment"
   name                       = var.container_apps_environment_name
   resource_group_name        = module.resource_group.name
-  location                   = module.resource_group.location
+  location                   = var.location
   log_analytics_workspace_id = module.log_analytics.id
   infrastructure_subnet_id   = module.network.container_apps_subnet_id
   tags                       = local.common_tags
@@ -50,7 +50,7 @@ module "managed_identity" {
   source              = "../../modules/managed_identity"
   name                = var.managed_identity_name
   resource_group_name = module.resource_group.name
-  location            = module.resource_group.location
+  location            = var.location
   acr_id              = var.acr_id
   tags                = local.common_tags
 }
@@ -59,7 +59,7 @@ module "postgresql" {
   source                 = "../../modules/postgresql_flexible_server"
   name                   = var.postgresql_server_name
   resource_group_name    = module.resource_group.name
-  location               = module.resource_group.location
+  location               = var.location
   postgresql_version     = var.postgresql_version
   delegated_subnet_id    = module.network.postgresql_subnet_id
   virtual_network_id     = module.network.virtual_network_id
@@ -121,7 +121,7 @@ module "container_app" {
 module "monitor_alerts" {
   source                  = "../../modules/monitor_alerts"
   resource_group_name     = module.resource_group.name
-  location                = module.resource_group.location
+  location                = var.location
   create_action_group     = var.create_action_group
   action_group_name       = var.action_group_name
   action_group_short_name = var.action_group_short_name

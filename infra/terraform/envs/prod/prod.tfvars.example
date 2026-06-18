@@ -1,5 +1,6 @@
 environment                          = "prod"
-location                             = "eastus"
+location                             = "eastus2"
+resource_group_location              = "eastus2"
 resource_group_name                  = "rg-cerohuella-prod"
 acr_id                               = "/subscriptions/<subscription-id>/resourceGroups/rg-cerohuella-shared/providers/Microsoft.ContainerRegistry/registries/acrcerohuellashared"
 acr_login_server                     = "acrcerohuellashared.azurecr.io"

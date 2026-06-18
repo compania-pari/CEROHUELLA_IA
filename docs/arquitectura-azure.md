@@ -59,15 +59,20 @@ Usar nombres predecibles, cortos y con ambiente al final. Para recursos que exig
 
 ## Region
 
-Region principal propuesta: `eastus`.
+Region principal para runtime por ambiente: `eastus2`.
 
 Motivos:
 
-- El despliegue actual de Azure Container Apps ya usa `eastus`.
+- Azure PostgreSQL Flexible Server devolvio `LocationIsOfferRestricted` al intentar crear `dev` en `eastus`.
+- `eastus2` aparece disponible para PostgreSQL Flexible Server y Azure Container Apps Environment en la suscripcion.
 - Mantiene runtime, red, observabilidad y PostgreSQL en una sola region para simplificar red privada.
 - Facilita el uso de una VNet por ambiente con Container Apps y PostgreSQL en el mismo alcance regional.
 
-Decision pendiente solo si aparece una restriccion de latencia o disponibilidad: evaluar `brazilsouth` como alternativa para usuarios en Peru. Para esta etapa se prioriza simplicidad operativa.
+El ACR compartido y el backend Terraform pueden mantenerse en `eastus` porque ya fueron creados correctamente y no dependen de PostgreSQL Flexible Server.
+
+Nota operativa: el resource group `dev` puede permanecer con metadata en `eastus` si ya existe de un apply parcial. Los recursos de runtime de `dev` se crean en `eastus2`.
+
+Decision pendiente solo si aparece una restriccion de latencia, disponibilidad o costo: evaluar `brazilsouth` como alternativa para usuarios en Peru. Para esta etapa se prioriza simplicidad operativa.
 
 ## Grupos de recursos
 
@@ -250,4 +255,3 @@ Controles compensatorios:
 - PostgreSQL Flexible Server con acceso privado: https://learn.microsoft.com/en-us/azure/postgresql/network/concepts-networking-private
 - Azure Monitor OpenTelemetry para Python: https://learn.microsoft.com/en-us/python/api/overview/azure/monitor-opentelemetry-readme
 - OpenTelemetry en Application Insights: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable
-
