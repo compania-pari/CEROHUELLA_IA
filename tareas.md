@@ -270,6 +270,29 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
   - PR creado como draft para revision previa. No se ejecuto `terraform apply` ni se crearon recursos Azure reales.
   - Checks GitHub iniciales: CI exitoso y Terraform `fmt/validate` exitoso en `shared`, `dev`, `qa` y `prod`.
 
+## Estado de despliegue real en Azure
+
+- [x] Bootstrap Terraform remoto creado en Azure.
+  - Backend: `rg-cerohuella-tfstate`, storage account `stcerohuellatf1043272f`, container `tfstate`.
+- [x] Ambiente `shared` aplicado con Terraform.
+  - ACR creado: `acrcerohuellashared.azurecr.io`.
+- [x] Imagen base de la aplicacion publicada en ACR para habilitar el primer despliegue.
+  - Repositorio/tag: `cerohuella-ia:latest`.
+- [x] Ambiente `dev` aplicado con Terraform.
+  - Resource group: `rg-cerohuella-dev`.
+  - Container App: `ca-cerohuella-api-dev`.
+  - PostgreSQL Flexible Server: `psql-cerohuella-dev-eus2`.
+  - Log Analytics: `law-cerohuella-dev-eus2`.
+  - Application Insights: `appi-cerohuella-dev-eus2`.
+  - Alertas basicas de Azure Monitor creadas para API y PostgreSQL.
+- [x] Verificacion `dev` contra `/health`.
+  - URL: `https://ca-cerohuella-api-dev.gentleriver-3e399988.eastus2.azurecontainerapps.io/health`.
+  - Resultado: `HTTP 200` con `{"status":"ok"}`.
+- [ ] Ambiente `qa` aplicado con Terraform.
+  - Pendiente de confirmacion del usuario por tiempo/costos.
+- [ ] Ambiente `prod` aplicado con Terraform.
+  - Pendiente de confirmacion del usuario por tiempo/costos.
+
 ## Preguntas no bloqueantes para decidir durante la implementacion
 
 - [x] Definir si `dev` se despliega desde `develop` y `prod` desde `main`, o si se usa `main` con promocion manual.
@@ -286,10 +309,15 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 - [x] Infraestructura nueva definida en Terraform y validada.
 - [x] GitHub Actions ejecuta CI correctamente.
 - [ ] GitHub Actions despliega `dev -> qa -> prod` con aprobaciones.
-- [ ] Imagen Docker se publica en ACR.
-- [ ] Container App responde `/health` por ambiente.
-- [ ] PostgreSQL nuevo queda provisionado y conectado.
-- [ ] Observabilidad basica visible en Azure Monitor/Application Insights.
-- [ ] Alertas basicas creadas.
+- [x] Imagen Docker se publica en ACR para `dev`.
+- [ ] Imagen Docker se publica/promueve para `qa` y `prod`.
+- [x] Container App responde `/health` en `dev`.
+- [ ] Container App responde `/health` en `qa` y `prod`.
+- [x] PostgreSQL nuevo queda provisionado para `dev`.
+- [ ] PostgreSQL nuevo queda provisionado para `qa` y `prod`.
+- [x] Observabilidad basica creada en Azure Monitor/Application Insights para `dev`.
+- [ ] Observabilidad basica creada en Azure Monitor/Application Insights para `qa` y `prod`.
+- [x] Alertas basicas creadas para `dev`.
+- [ ] Alertas basicas creadas para `qa` y `prod`.
 - [x] Documentacion operativa completa.
 - [x] Codigo publicado en `compania-pari/CEROHUELLA_IA`.
