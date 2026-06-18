@@ -167,16 +167,16 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 ## Fase 9 - Workflow CD dev -> qa -> prod
 
-- [ ] Crear `.github/workflows/deploy.yml`.
-- [ ] Construir imagen con tag por SHA corto.
-- [ ] Publicar imagen en ACR.
-- [ ] Desplegar automaticamente a `dev`.
-- [ ] Ejecutar smoke test contra `/health` en `dev`.
-- [ ] Promover a `qa` con aprobacion manual.
-- [ ] Ejecutar smoke test contra `/health` en `qa`.
-- [ ] Promover a `prod` con aprobacion manual.
-- [ ] Ejecutar smoke test contra `/health` en `prod`.
-- [ ] Publicar URLs finales por ambiente en el resumen del workflow.
+- [x] Crear `.github/workflows/deploy.yml`.
+- [x] Construir imagen con tag por SHA corto.
+- [x] Publicar imagen en ACR.
+- [x] Desplegar automaticamente a `dev`.
+- [x] Ejecutar smoke test contra `/health` en `dev`.
+- [x] Promover a `qa` con aprobacion manual.
+- [x] Ejecutar smoke test contra `/health` en `qa`.
+- [x] Promover a `prod` con aprobacion manual.
+- [x] Ejecutar smoke test contra `/health` en `prod`.
+- [x] Publicar URLs finales por ambiente en el resumen del workflow.
 
 ## Fase 10 - Observabilidad basica Azure
 

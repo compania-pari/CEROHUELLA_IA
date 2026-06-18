@@ -1,0 +1,317 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy"
+        required: true
+        type: choice
+        options:
+          - dev
+          - qa
+          - prod
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  IMAGE_REPOSITORY: cerohuella-ia
+  RESOURCE_GROUP_PREFIX: rg-cerohuella
+  CONTAINER_APP_PREFIX: ca-cerohuella-api
+
+jobs:
+  deploy-dev:
+    name: Deploy dev
+    if: github.event_name == 'push' && github.ref_name == 'develop' || github.event_name == 'workflow_dispatch' && inputs.environment == 'dev'
+    runs-on: ubuntu-24.04
+    environment: dev
+    timeout-minutes: 30
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+      url: ${{ steps.smoke.outputs.url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Resolve image
+        id: image
+        env:
+          ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
+        run: |
+          short_sha="${GITHUB_SHA::7}"
+          image="${ACR_LOGIN_SERVER}/${IMAGE_REPOSITORY}:${short_sha}"
+          echo "image=${image}" >> "${GITHUB_OUTPUT}"
+          echo "acr_name=${ACR_LOGIN_SERVER%%.azurecr.io}" >> "${GITHUB_OUTPUT}"
+
+      - name: Build and push image
+        env:
+          ACR_NAME: ${{ steps.image.outputs.acr_name }}
+          IMAGE: ${{ steps.image.outputs.image }}
+        run: |
+          az acr login --name "${ACR_NAME}"
+          docker build --tag "${IMAGE}" .
+          docker push "${IMAGE}"
+
+      - name: Deploy Container App
+        env:
+          IMAGE: ${{ steps.image.outputs.image }}
+        run: |
+          az containerapp update \
+            --name "${CONTAINER_APP_PREFIX}-dev" \
+            --resource-group "${RESOURCE_GROUP_PREFIX}-dev" \
+            --image "${IMAGE}"
+
+      - name: Smoke test
+        id: smoke
+        run: |
+          fqdn="$(az containerapp show \
+            --name "${CONTAINER_APP_PREFIX}-dev" \
+            --resource-group "${RESOURCE_GROUP_PREFIX}-dev" \
+            --query properties.configuration.ingress.fqdn \
+            --output tsv)"
+          url="https://${fqdn}/health"
+          for attempt in {1..24}; do
+            if curl --fail --silent --show-error "${url}"; then
+              echo "url=https://${fqdn}" >> "${GITHUB_OUTPUT}"
+              exit 0
+            fi
+            echo "Waiting for healthy dev revision, attempt ${attempt}/24"
+            sleep 5
+          done
+          exit 1
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## CD dev"
+            echo ""
+            echo "- Image: ${{ steps.image.outputs.image }}"
+            echo "- URL: ${{ steps.smoke.outputs.url }}"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+  deploy-qa:
+    name: Deploy qa
+    if: github.event_name == 'push' && github.ref_name == 'main' || github.event_name == 'workflow_dispatch' && inputs.environment == 'qa'
+    runs-on: ubuntu-24.04
+    environment: qa
+    timeout-minutes: 30
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+      url: ${{ steps.smoke.outputs.url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Resolve image
+        id: image
+        env:
+          ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
+        run: |
+          short_sha="${GITHUB_SHA::7}"
+          image="${ACR_LOGIN_SERVER}/${IMAGE_REPOSITORY}:${short_sha}"
+          echo "image=${image}" >> "${GITHUB_OUTPUT}"
+          echo "acr_name=${ACR_LOGIN_SERVER%%.azurecr.io}" >> "${GITHUB_OUTPUT}"
+
+      - name: Build and push image
+        env:
+          ACR_NAME: ${{ steps.image.outputs.acr_name }}
+          IMAGE: ${{ steps.image.outputs.image }}
+        run: |
+          az acr login --name "${ACR_NAME}"
+          docker build --tag "${IMAGE}" .
+          docker push "${IMAGE}"
+
+      - name: Deploy Container App
+        env:
+          IMAGE: ${{ steps.image.outputs.image }}
+        run: |
+          az containerapp update \
+            --name "${CONTAINER_APP_PREFIX}-qa" \
+            --resource-group "${RESOURCE_GROUP_PREFIX}-qa" \
+            --image "${IMAGE}"
+
+      - name: Smoke test
+        id: smoke
+        run: |
+          fqdn="$(az containerapp show \
+            --name "${CONTAINER_APP_PREFIX}-qa" \
+            --resource-group "${RESOURCE_GROUP_PREFIX}-qa" \
+            --query properties.configuration.ingress.fqdn \
+            --output tsv)"
+          url="https://${fqdn}/health"
+          for attempt in {1..24}; do
+            if curl --fail --silent --show-error "${url}"; then
+              echo "url=https://${fqdn}" >> "${GITHUB_OUTPUT}"
+              exit 0
+            fi
+            echo "Waiting for healthy qa revision, attempt ${attempt}/24"
+            sleep 5
+          done
+          exit 1
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## CD qa"
+            echo ""
+            echo "- Image: ${{ steps.image.outputs.image }}"
+            echo "- URL: ${{ steps.smoke.outputs.url }}"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+  promote-prod:
+    name: Promote prod
+    needs: deploy-qa
+    if: github.event_name == 'push' && github.ref_name == 'main'
+    runs-on: ubuntu-24.04
+    environment: prod
+    timeout-minutes: 20
+    outputs:
+      url: ${{ steps.smoke.outputs.url }}
+
+    steps:
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy Container App
+        env:
+          IMAGE: ${{ needs.deploy-qa.outputs.image }}
+        run: |
+          az containerapp update \
+            --name "${CONTAINER_APP_PREFIX}-prod" \
+            --resource-group "${RESOURCE_GROUP_PREFIX}-prod" \
+            --image "${IMAGE}"
+
+      - name: Smoke test
+        id: smoke
+        run: |
+          fqdn="$(az containerapp show \
+            --name "${CONTAINER_APP_PREFIX}-prod" \
+            --resource-group "${RESOURCE_GROUP_PREFIX}-prod" \
+            --query properties.configuration.ingress.fqdn \
+            --output tsv)"
+          url="https://${fqdn}/health"
+          for attempt in {1..24}; do
+            if curl --fail --silent --show-error "${url}"; then
+              echo "url=https://${fqdn}" >> "${GITHUB_OUTPUT}"
+              exit 0
+            fi
+            echo "Waiting for healthy prod revision, attempt ${attempt}/24"
+            sleep 5
+          done
+          exit 1
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## CD prod"
+            echo ""
+            echo "- Image: ${{ needs.deploy-qa.outputs.image }}"
+            echo "- URL: ${{ steps.smoke.outputs.url }}"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+  deploy-prod-manual:
+    name: Deploy prod manually
+    if: github.event_name == 'workflow_dispatch' && inputs.environment == 'prod'
+    runs-on: ubuntu-24.04
+    environment: prod
+    timeout-minutes: 30
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+      url: ${{ steps.smoke.outputs.url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Resolve image
+        id: image
+        env:
+          ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
+        run: |
+          short_sha="${GITHUB_SHA::7}"
+          image="${ACR_LOGIN_SERVER}/${IMAGE_REPOSITORY}:${short_sha}"
+          echo "image=${image}" >> "${GITHUB_OUTPUT}"
+          echo "acr_name=${ACR_LOGIN_SERVER%%.azurecr.io}" >> "${GITHUB_OUTPUT}"
+
+      - name: Build and push image
+        env:
+          ACR_NAME: ${{ steps.image.outputs.acr_name }}
+          IMAGE: ${{ steps.image.outputs.image }}
+        run: |
+          az acr login --name "${ACR_NAME}"
+          docker build --tag "${IMAGE}" .
+          docker push "${IMAGE}"
+
+      - name: Deploy Container App
+        env:
+          IMAGE: ${{ steps.image.outputs.image }}
+        run: |
+          az containerapp update \
+            --name "${CONTAINER_APP_PREFIX}-prod" \
+            --resource-group "${RESOURCE_GROUP_PREFIX}-prod" \
+            --image "${IMAGE}"
+
+      - name: Smoke test
+        id: smoke
+        run: |
+          fqdn="$(az containerapp show \
+            --name "${CONTAINER_APP_PREFIX}-prod" \
+            --resource-group "${RESOURCE_GROUP_PREFIX}-prod" \
+            --query properties.configuration.ingress.fqdn \
+            --output tsv)"
+          url="https://${fqdn}/health"
+          for attempt in {1..24}; do
+            if curl --fail --silent --show-error "${url}"; then
+              echo "url=https://${fqdn}" >> "${GITHUB_OUTPUT}"
+              exit 0
+            fi
+            echo "Waiting for healthy prod revision, attempt ${attempt}/24"
+            sleep 5
+          done
+          exit 1
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## CD prod manual"
+            echo ""
+            echo "- Image: ${{ steps.image.outputs.image }}"
+            echo "- URL: ${{ steps.smoke.outputs.url }}"
+          } >> "${GITHUB_STEP_SUMMARY}"

@@ -83,9 +83,28 @@ Configurar como GitHub Environment variables o secrets:
 | `TFSTATE_STORAGE_ACCOUNT_NAME` | variable | Storage account del backend Terraform. |
 | `TFSTATE_CONTAINER_NAME` | variable | Container del backend Terraform, normalmente `tfstate`. |
 | `ACR_ID` | variable | ID del ACR compartido. No aplica para `shared`. |
-| `ACR_LOGIN_SERVER` | variable | Login server del ACR compartido. No aplica para `shared`. |
+| `ACR_LOGIN_SERVER` | variable | Login server del ACR compartido. Requerido por Terraform y CD. |
 
 `DATABASE_URL` no debe configurarse manualmente si Terraform lo compone y lo guarda como secret de Container App.
+
+## Workflow CD
+
+El workflow `.github/workflows/deploy.yml` usa los environments de GitHub como compuertas:
+
+- `develop` despliega automaticamente a `dev`.
+- `main` despliega a `qa` y luego promueve la misma imagen a `prod`.
+- `workflow_dispatch` permite desplegar manualmente a `dev`, `qa` o `prod`.
+
+Cada despliegue:
+
+1. Autentica contra Azure con OIDC.
+2. Construye la imagen Docker con tag de SHA corto.
+3. Publica la imagen en ACR.
+4. Actualiza Azure Container App.
+5. Ejecuta smoke test contra `/health`.
+6. Publica imagen y URL en el resumen del workflow.
+
+El job de `prod` en el flujo de `main` no reconstruye la imagen; reutiliza la imagen validada en `qa`.
 
 ## Reglas de seguridad
 
