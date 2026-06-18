@@ -63,16 +63,18 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 ## Fase 3 - Modulos Terraform
 
-- [ ] Crear modulo `resource_group`.
-- [ ] Crear modulo `container_registry`.
-- [ ] Crear modulo `log_analytics`.
-- [ ] Crear modulo `application_insights`.
-- [ ] Crear modulo `container_apps_environment`.
-- [ ] Crear modulo `container_app`.
-- [ ] Crear modulo `postgresql_flexible_server`.
-- [ ] Crear modulo `managed_identity` y permisos ACR Pull.
-- [ ] Crear modulo de alertas Azure Monitor.
-- [ ] Definir outputs utiles: FQDN de Container App, login server ACR, connection strings, nombres de recursos.
+- [x] Crear modulo `resource_group`.
+- [x] Crear modulo `container_registry`.
+- [x] Crear modulo `log_analytics`.
+- [x] Crear modulo `application_insights`.
+- [x] Crear modulo `container_apps_environment`.
+- [x] Crear modulo `container_app`.
+- [x] Crear modulo `postgresql_flexible_server`.
+- [x] Crear modulo `managed_identity` y permisos ACR Pull.
+- [x] Crear modulo de alertas Azure Monitor.
+- [x] Definir outputs utiles: FQDN de Container App, login server ACR, connection strings, nombres de recursos.
+  - Tambien se agrego modulo `network` para VNet, subnet de Container Apps y subnet delegada de PostgreSQL.
+  - Validacion: `terraform fmt -recursive infra\terraform` y `terraform validate` por modulo con provider `azurerm v4.77.0`.
 
 ## Fase 4 - Ambientes Terraform
 
