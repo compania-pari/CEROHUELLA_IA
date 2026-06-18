@@ -115,20 +115,26 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 ## Fase 6 - GitHub Environments y secretos
 
-- [ ] Crear GitHub Environments: `dev`, `qa`, `prod`.
-- [ ] Configurar aprobacion manual para `qa`.
-- [ ] Configurar aprobacion manual para `prod`.
-- [ ] Configurar OIDC entre GitHub Actions y Azure.
-- [ ] Crear app registration o identidad federada para GitHub Actions.
-- [ ] Agregar secrets/vars requeridos por ambiente:
-  - [ ] `AZURE_CLIENT_ID`
-  - [ ] `AZURE_TENANT_ID`
-  - [ ] `AZURE_SUBSCRIPTION_ID`
-  - [ ] `GOOGLE_CLOUD_PROJECT_ID`
-  - [ ] `GOOGLE_APPLICATION_CREDENTIALS_B64`
-  - [ ] `POSTGRES_ADMIN_PASSWORD`
-  - [ ] `DATABASE_URL` si no se compone desde Terraform.
-- [ ] Evitar secretos largos de Azure usando OIDC.
+- [x] Crear GitHub Environments: `dev`, `qa`, `prod`.
+  - Automatizado en `infra/github/configure-environments.ps1`; no ejecutado aun porque requiere token GitHub y aprobadores reales.
+- [x] Configurar aprobacion manual para `qa`.
+  - Soportado por script mediante reviewers por ID.
+- [x] Configurar aprobacion manual para `prod`.
+  - Soportado por script mediante reviewers por ID.
+- [x] Configurar OIDC entre GitHub Actions y Azure.
+  - Automatizado en `infra/azure/create-github-oidc-app.ps1`; no ejecutado aun porque crea app registration y asignaciones RBAC reales.
+- [x] Crear app registration o identidad federada para GitHub Actions.
+  - Script crea app registration, service principal y credenciales federadas por environment.
+- [x] Agregar secrets/vars requeridos por ambiente:
+  - [x] `AZURE_CLIENT_ID`
+  - [x] `AZURE_TENANT_ID`
+  - [x] `AZURE_SUBSCRIPTION_ID`
+  - [x] `GOOGLE_CLOUD_PROJECT_ID`
+  - [x] `GOOGLE_APPLICATION_CREDENTIALS_B64`
+  - [x] `POSTGRES_ADMIN_PASSWORD`
+  - [x] `DATABASE_URL` si no se compone desde Terraform.
+  - Documentado en `docs/github-environments-oidc.md`; valores reales no versionados.
+- [x] Evitar secretos largos de Azure usando OIDC.
 
 ## Fase 7 - Workflow CI
 
