@@ -71,44 +71,91 @@ En Azure debe preferirse:
 
 No usar `GOOGLE_APPLICATION_CREDENTIALS_JSON` en Azure porque el JSON crudo puede romperse por comillas al guardarse como secreto.
 
-## Despliegue Actual
+## Despliegue Actual GitHub + Azure + Terraform
 
-La API esta desplegada en Azure Container App.
+El despliegue vigente se esta migrando a GitHub Actions como unico CI/CD y Azure como plataforma de runtime, base de datos, registry y observabilidad.
 
-Recursos principales:
+Repositorio GitHub:
+
+- Owner/repo: `compania-pari/CEROHUELLA_IA`
+- Rama de trabajo: `codex/github-azure-terraform-cicd`
+- PR actual: `https://github.com/compania-pari/CEROHUELLA_IA/pull/1`
+- Remoto local principal para este trabajo: `github`
+
+Terraform:
+
+- Codigo: `infra/terraform`
+- Backend remoto: `rg-cerohuella-tfstate`
+- Storage account de estado: `stcerohuellatf1043272f`
+- Container de estado: `tfstate`
+- Keys usadas: `envs/shared/terraform.tfstate`, `envs/dev/terraform.tfstate`, `envs/qa/terraform.tfstate`, `envs/prod/terraform.tfstate`
+- Workflows: `.github/workflows/terraform.yml`, `.github/workflows/ci.yml`, `.github/workflows/deploy.yml`
+- `Plan or apply` aparece como `skipping` en PR o cuando no es `workflow_dispatch`; eso es esperado.
+
+Recursos actuales aplicados:
+
+- Shared:
+  - Resource group: `rg-cerohuella-shared`
+  - ACR: `acrcerohuellashared.azurecr.io`
+  - Imagen inicial publicada: `cerohuella-ia:latest`
+- Dev:
+  - Resource group: `rg-cerohuella-dev`
+  - Region runtime: `eastus2`
+  - Container App: `ca-cerohuella-api-dev`
+  - URL dev: `https://ca-cerohuella-api-dev.gentleriver-3e399988.eastus2.azurecontainerapps.io`
+  - Health dev: `https://ca-cerohuella-api-dev.gentleriver-3e399988.eastus2.azurecontainerapps.io/health`
+  - PostgreSQL Flexible Server: `psql-cerohuella-dev-eus2`
+  - Database: `cerohuella`
+  - Log Analytics: `law-cerohuella-dev-eus2`
+  - Application Insights: `appi-cerohuella-dev-eus2`
+  - Observabilidad: alertas basicas de API, Container App y PostgreSQL creadas por Terraform.
+
+Ambientes pendientes:
+
+- `qa`: no aplicar sin confirmacion explicita del usuario.
+- `prod`: no aplicar sin confirmacion explicita del usuario.
+
+## Lecciones Aprendidas GitHub + Terraform + Azure
+
+- Usar `gh` como fallback operativo cuando el conector `@github` no permita alguna accion. En esta migracion, el conector devolvio `403 Resource not accessible by integration` al crear el PR.
+- GitHub Actions usa OIDC contra Azure. No cargar secretos de Azure tipo client secret si OIDC ya esta configurado.
+- Cargar secretos por GitHub Environments. Para Google DLP usar `GOOGLE_APPLICATION_CREDENTIALS_B64`, no JSON crudo.
+- En Azure Container Apps, la subnet debe tener delegacion a `Microsoft.App/environments`; sin eso falla la creacion del Container Apps Environment.
+- Usar `eastus2` como region runtime. PostgreSQL Flexible Server fallo en `eastus` por `LocationIsOfferRestricted`.
+- Mantener nombres con sufijo `eus2` cuando sea necesario para evitar conflictos de nombres reservados o recursos en soft-delete:
+  - `law-cerohuella-dev-eus2`
+  - `appi-cerohuella-dev-eus2`
+  - `psql-cerohuella-dev-eus2`
+- Antes del primer `terraform apply` de un ambiente con Container App, asegurar que exista la imagen referenciada en ACR. Para dev se publico `cerohuella-ia:latest`.
+- Si `az acr build` falla localmente por `UnicodeEncodeError` al transmitir logs en Windows, revisar el resultado con `az acr task list-runs` y validar tags con `az acr repository show-tags`.
+- Si Azure deja un Container App en `ProvisioningState=Failed`, Terraform puede no importarlo porque Azure bloquea la lectura de secretos con error `ResourceNotProvisioned`. En ese caso, si el recurso no tiene revision lista ni FQDN, pedir confirmacion y eliminar solo ese Container App fallido antes de relanzar `terraform apply`.
+- No borrar ni recrear recursos cloud sin confirmacion explicita del usuario. En DEV se elimino solamente `ca-cerohuella-api-dev` en estado fallido y luego Terraform lo recreo correctamente.
+- Al validar DEV, confirmar tres cosas: workflow Terraform exitoso, recurso Azure `Succeeded/Running`, y `/health` con `HTTP 200`.
+- Despues de cada cambio documental o de infraestructura, actualizar `tareas.md` y subir el commit al PR para mantener trazabilidad.
+
+## Despliegue Azure DevOps Historico
+
+El despliegue anterior en Azure DevOps queda como referencia historica. No debe usarse como CI/CD activo mientras GitHub sea el destino de la migracion.
+
+Recursos anteriores documentados:
 
 - Resource group: `rg-cerohuella-dev`
 - Container App: `ca-cerohuella-api-dev`
-- Azure Container Registry: `acrcerohuella`
-- Imagen: `acrcerohuella.azurecr.io/cerohuella-ia`
-- Azure PostgreSQL: `cerohuella-bd`
-- URL Azure: `https://ca-cerohuella-api-dev.victorioussea-9b4cd674.eastus.azurecontainerapps.io`
-- Health Azure: `https://ca-cerohuella-api-dev.victorioussea-9b4cd674.eastus.azurecontainerapps.io/health`
-- Swagger Azure: `https://ca-cerohuella-api-dev.victorioussea-9b4cd674.eastus.azurecontainerapps.io/docs`
+- Azure Container Registry anterior: `acrcerohuella`
+- Imagen anterior: `acrcerohuella.azurecr.io/cerohuella-ia`
+- Azure PostgreSQL anterior: `cerohuella-bd`
+- URL Azure anterior: `https://ca-cerohuella-api-dev.victorioussea-9b4cd674.eastus.azurecontainerapps.io`
 
-Para recrear Azure desde cero o reconfigurar el despliegue, usar:
+Scripts historicos:
 
-- `docs/azure-recreate.md`: guia operativa de recreacion.
-- `infra/azure/README.md`: orden y proposito de scripts.
+- `docs/azure-recreate.md`: guia operativa de recreacion previa.
+- `infra/azure/README.md`: orden y proposito de scripts previos.
 - `infra/azure/create-resources.ps1`: crea recursos base de Azure.
 - `infra/azure/configure-containerapp.ps1`: crea/configura Container App, secretos y variables.
 - `infra/azure/create-devops-service-connection.ps1`: crea Service Connection en Azure DevOps.
 - `infra/azure/create-devops-release.ps1`: recrea Release clasico automatico.
 
 Los scripts son plantillas operativas con parametros; no contienen secretos reales.
-
-Flujo:
-
-```text
-Merge a main
- -> build_cerohuella_ia
- -> pruebas con pytest
- -> construccion de imagen Docker
- -> publicacion en ACR
- -> artifact drop/image.env
- -> release_cerohuella_ia_dev
- -> despliegue en Azure Container App
-```
 
 ## Azure DevOps
 
