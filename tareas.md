@@ -11,19 +11,22 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 - [x] Mantener almacenamiento local en disco para esta etapa.
 - [x] Crear nueva instancia PostgreSQL desde Terraform.
 - [x] Mantener GitHub como unico CI/CD.
-- [x] Usar GitHub CLI (`gh`) y Azure CLI (`az`) como herramientas operativas.
+- [x] Usar el plugin `@github` y Azure CLI (`az`) como herramientas operativas.
 - [x] Repositorio GitHub destino: `compania-pari/CEROHUELLA_IA`.
 
 ## Fase 0 - Preparacion del repositorio
 
-- [ ] Verificar estado local con `git status`.
-- [ ] Revisar remotos actuales con `git remote -v`.
-- [ ] Configurar remoto GitHub hacia `https://github.com/compania-pari/CEROHUELLA_IA`.
-- [ ] Verificar acceso al repositorio con `gh repo view compania-pari/CEROHUELLA_IA`.
-- [ ] Crear rama de trabajo `codex/github-azure-terraform-cicd`.
-- [ ] Identificar cambios locales existentes para no sobrescribir trabajo previo.
-- [ ] Definir si se conserva `develop` como rama de integracion o si todo parte desde `main`.
-- [ ] Documentar que Azure DevOps y AWS quedan como historico, no como CI/CD activo.
+- [x] Verificar estado local con `git status`.
+- [x] Revisar remotos actuales con `git remote -v`.
+- [x] Configurar remoto GitHub hacia `https://github.com/compania-pari/CEROHUELLA_IA`.
+- [x] Verificar acceso al repositorio con el plugin `@github`.
+  - Repositorio encontrado: `compania-pari/CEROHUELLA_IA`, publico, rama por defecto `main`, permisos de administracion y escritura disponibles. El repositorio esta vacio al momento de la verificacion.
+- [x] Crear rama de trabajo `codex/github-azure-terraform-cicd`.
+- [x] Identificar cambios locales existentes para no sobrescribir trabajo previo.
+- [x] Definir si se conserva `develop` como rama de integracion o si todo parte desde `main`.
+  - Decision inicial: conservar `develop` como rama de integracion y `main` como rama estable/release.
+- [x] Documentar que Azure DevOps y AWS quedan como historico, no como CI/CD activo.
+  - Decision inicial: mantener remotos `azure` y `aws` como referencia historica; usar el remoto `github` para el nuevo trabajo.
 
 ## Fase 1 - Diseno de arquitectura Azure
 
@@ -234,4 +237,3 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 - [ ] Alertas basicas creadas.
 - [ ] Documentacion operativa completa.
 - [ ] Codigo publicado en `compania-pari/CEROHUELLA_IA`.
-
