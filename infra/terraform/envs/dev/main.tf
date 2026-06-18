@@ -121,6 +121,7 @@ module "container_app" {
 module "monitor_alerts" {
   source                  = "../../modules/monitor_alerts"
   resource_group_name     = module.resource_group.name
+  location                = module.resource_group.location
   create_action_group     = var.create_action_group
   action_group_name       = var.action_group_name
   action_group_short_name = var.action_group_short_name
@@ -140,6 +141,17 @@ module "monitor_alerts" {
       operator         = "GreaterThan"
       threshold        = var.container_cpu_alert_threshold
     }
+    container_memory_high = {
+      name             = "ma-cerohuella-api-${var.environment}-memory-high"
+      scopes           = [module.container_app.id]
+      description      = "Container App memory is above threshold."
+      severity         = 3
+      metric_namespace = "Microsoft.App/containerApps"
+      metric_name      = "MemoryPercentage"
+      aggregation      = "Average"
+      operator         = "GreaterThan"
+      threshold        = var.container_memory_alert_threshold
+    }
     postgresql_cpu_high = {
       name             = "ma-cerohuella-postgresql-${var.environment}-cpu-high"
       scopes           = [module.postgresql.id]
@@ -151,6 +163,115 @@ module "monitor_alerts" {
       operator         = "GreaterThan"
       threshold        = var.postgresql_cpu_alert_threshold
     }
+    postgresql_storage_high = {
+      name             = "ma-cerohuella-postgresql-${var.environment}-storage-high"
+      scopes           = [module.postgresql.id]
+      description      = "PostgreSQL storage is above threshold."
+      severity         = 3
+      metric_namespace = "Microsoft.DBforPostgreSQL/flexibleServers"
+      metric_name      = "storage_percent"
+      aggregation      = "Average"
+      operator         = "GreaterThan"
+      threshold        = var.postgresql_storage_alert_threshold
+    }
+    postgresql_connections_high = {
+      name             = "ma-cerohuella-postgresql-${var.environment}-connections-high"
+      scopes           = [module.postgresql.id]
+      description      = "PostgreSQL active connections are above threshold."
+      severity         = 3
+      metric_namespace = "Microsoft.DBforPostgreSQL/flexibleServers"
+      metric_name      = "active_connections"
+      aggregation      = "Average"
+      operator         = "GreaterThan"
+      threshold        = var.postgresql_connections_alert_threshold
+    }
+  }
+
+  scheduled_query_alerts = {
+    api_health_failed = {
+      name                    = "sqa-cerohuella-api-${var.environment}-health-failed"
+      scopes                  = [module.log_analytics.id]
+      description             = "Health endpoint returned an unsuccessful response."
+      severity                = 2
+      evaluation_frequency    = "PT5M"
+      window_duration         = "PT5M"
+      query                   = <<-KQL
+        AppRequests
+        | where Url endswith "/health"
+        | where Success == false or toint(ResultCode) >= 500
+        | summarize Count = count()
+      KQL
+      time_aggregation_method = "Total"
+      metric_measure_column   = "Count"
+      operator                = "GreaterThan"
+      threshold               = 0
+    }
+    http_5xx = {
+      name                    = "sqa-cerohuella-api-${var.environment}-http-5xx"
+      scopes                  = [module.log_analytics.id]
+      description             = "HTTP 5xx responses detected."
+      severity                = 2
+      evaluation_frequency    = "PT5M"
+      window_duration         = "PT5M"
+      query                   = <<-KQL
+        AppRequests
+        | where toint(ResultCode) >= 500
+        | summarize Count = count()
+      KQL
+      time_aggregation_method = "Total"
+      metric_measure_column   = "Count"
+      operator                = "GreaterThan"
+      threshold               = var.http_5xx_alert_threshold
+    }
+    latency_high = {
+      name                    = "sqa-cerohuella-api-${var.environment}-latency-high"
+      scopes                  = [module.log_analytics.id]
+      description             = "Average request latency is above threshold."
+      severity                = 3
+      evaluation_frequency    = "PT5M"
+      window_duration         = "PT5M"
+      query                   = <<-KQL
+        AppRequests
+        | summarize avgDurationMs = avg(DurationMs)
+      KQL
+      time_aggregation_method = "Average"
+      metric_measure_column   = "avgDurationMs"
+      operator                = "GreaterThan"
+      threshold               = var.latency_ms_alert_threshold
+    }
+    exceptions_detected = {
+      name                    = "sqa-cerohuella-api-${var.environment}-exceptions"
+      scopes                  = [module.log_analytics.id]
+      description             = "Application exceptions detected."
+      severity                = 2
+      evaluation_frequency    = "PT5M"
+      window_duration         = "PT5M"
+      query                   = <<-KQL
+        AppExceptions
+        | summarize Count = count()
+      KQL
+      time_aggregation_method = "Total"
+      metric_measure_column   = "Count"
+      operator                = "GreaterThan"
+      threshold               = 0
+    }
+    container_restarts = {
+      name                    = "sqa-cerohuella-api-${var.environment}-container-restarts"
+      scopes                  = [module.log_analytics.id]
+      description             = "Container restarts or crash loops detected."
+      severity                = 2
+      evaluation_frequency    = "PT5M"
+      window_duration         = "PT5M"
+      query                   = <<-KQL
+        ContainerAppSystemLogs_CL
+        | where ContainerAppName_s == "${var.container_app_name}"
+        | where Log_s has_any ("Restart", "restarted", "CrashLoopBackOff", "Back-off")
+        | summarize Count = count()
+      KQL
+      time_aggregation_method = "Total"
+      metric_measure_column   = "Count"
+      operator                = "GreaterThan"
+      threshold               = 0
+    }
   }
 }
-

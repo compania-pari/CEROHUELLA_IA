@@ -180,22 +180,22 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 ## Fase 10 - Observabilidad basica Azure
 
-- [ ] Crear Log Analytics Workspace por ambiente o compartido.
-- [ ] Conectar Container Apps Environment a Log Analytics.
-- [ ] Crear Application Insights.
-- [ ] Agregar `APPLICATIONINSIGHTS_CONNECTION_STRING` como secreto o variable segura.
+- [x] Crear Log Analytics Workspace por ambiente o compartido.
+- [x] Conectar Container Apps Environment a Log Analytics.
+- [x] Crear Application Insights.
+- [x] Agregar `APPLICATIONINSIGHTS_CONNECTION_STRING` como secreto o variable segura.
 - [ ] Instrumentar FastAPI con Azure Monitor OpenTelemetry.
-- [ ] Configurar nombre de servicio con `OTEL_SERVICE_NAME`.
+- [x] Configurar nombre de servicio con `OTEL_SERVICE_NAME`.
 - [ ] Enviar logs de aplicacion a stdout en formato claro para Log Analytics.
-- [ ] Definir consultas KQL iniciales para requests, errores, excepciones y logs de contenedor.
-- [ ] Crear alertas iniciales:
-  - [ ] API no saludable.
-  - [ ] Errores HTTP 5xx.
-  - [ ] Latencia alta.
-  - [ ] Fallos o reinicios de Container App.
-  - [ ] Uso alto de CPU o memoria.
-  - [ ] PostgreSQL con CPU, storage o conexiones altas.
-- [ ] Documentar decision de no desplegar Prometheus/Grafana/Loki/Jaeger en esta etapa.
+- [x] Definir consultas KQL iniciales para requests, errores, excepciones y logs de contenedor.
+- [x] Crear alertas iniciales:
+  - [x] API no saludable.
+  - [x] Errores HTTP 5xx.
+  - [x] Latencia alta.
+  - [x] Fallos o reinicios de Container App.
+  - [x] Uso alto de CPU o memoria.
+  - [x] PostgreSQL con CPU, storage o conexiones altas.
+- [x] Documentar decision de no desplegar Prometheus/Grafana/Loki/Jaeger en esta etapa.
 
 ## Fase 11 - Cambios minimos en aplicacion
 

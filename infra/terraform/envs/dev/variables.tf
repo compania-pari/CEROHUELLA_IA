@@ -289,9 +289,38 @@ variable "container_cpu_alert_threshold" {
   default     = 80
 }
 
+variable "container_memory_alert_threshold" {
+  description = "Container App memory alert threshold."
+  type        = number
+  default     = 80
+}
+
 variable "postgresql_cpu_alert_threshold" {
   description = "PostgreSQL CPU alert threshold."
   type        = number
   default     = 80
 }
 
+variable "postgresql_storage_alert_threshold" {
+  description = "PostgreSQL storage alert threshold."
+  type        = number
+  default     = 80
+}
+
+variable "postgresql_connections_alert_threshold" {
+  description = "PostgreSQL active connections alert threshold."
+  type        = number
+  default     = 80
+}
+
+variable "http_5xx_alert_threshold" {
+  description = "HTTP 5xx count threshold for scheduled query alerts."
+  type        = number
+  default     = 5
+}
+
+variable "latency_ms_alert_threshold" {
+  description = "Average request latency threshold in milliseconds."
+  type        = number
+  default     = 2000
+}

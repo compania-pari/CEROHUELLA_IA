@@ -12,4 +12,10 @@ postgres_admin_password              = "<postgres-admin-password>"
 create_action_group                  = false
 alert_email_receivers                = {}
 alert_webhook_receivers              = {}
-
+container_cpu_alert_threshold        = 80
+container_memory_alert_threshold     = 80
+postgresql_cpu_alert_threshold       = 80
+postgresql_storage_alert_threshold   = 80
+postgresql_connections_alert_threshold = 80
+http_5xx_alert_threshold             = 5
+latency_ms_alert_threshold           = 2000

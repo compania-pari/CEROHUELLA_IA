@@ -240,6 +240,7 @@ gcp*.json
 
 # Terraform local state and sensitive variable files
 **/.terraform/
+infra/terraform/modules/**/.terraform.lock.hcl
 *.tfstate
 *.tfstate.*
 *.tfplan
