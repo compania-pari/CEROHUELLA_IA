@@ -222,18 +222,18 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 ## Fase 13 - Documentacion
 
-- [ ] Crear `docs/github-azure-cicd.md`.
-- [ ] Crear `docs/terraform-azure.md`.
-- [ ] Crear `docs/observabilidad-azure.md`.
-- [ ] Actualizar `README.md` con resumen del nuevo flujo.
+- [x] Crear `docs/github-azure-cicd.md`.
+- [x] Crear `docs/terraform-azure.md`.
+- [x] Crear `docs/observabilidad-azure.md`.
+- [x] Actualizar `README.md` con resumen del nuevo flujo.
 - [ ] Documentar comandos operativos:
-  - [ ] Bootstrap Terraform.
-  - [ ] Plan/apply por ambiente.
-  - [ ] Ejecucion CI.
-  - [ ] Promocion dev -> qa -> prod.
-  - [ ] Consulta de logs y trazas.
-- [ ] Documentar rollback basico de Container Apps.
-- [ ] Documentar limpieza de recursos para controlar costos.
+  - [x] Bootstrap Terraform.
+  - [x] Plan/apply por ambiente.
+  - [x] Ejecucion CI.
+  - [x] Promocion dev -> qa -> prod.
+  - [x] Consulta de logs y trazas.
+- [x] Documentar rollback basico de Container Apps.
+- [x] Documentar limpieza de recursos para controlar costos.
 
 ## Fase 14 - Validacion local
 

@@ -138,3 +138,13 @@ La decision de canal final queda pendiente: correo, webhook, Teams u otro mecani
 3. Validar `/health`.
 4. Revisar `AppRequests` y `ContainerAppConsoleLogs_CL` en Log Analytics.
 5. Confirmar que las reglas de alerta quedan creadas en Azure Monitor.
+
+## Consulta rapida con Azure CLI
+
+```powershell
+az monitor log-analytics query `
+  --workspace <workspace-id> `
+  --analytics-query "AppRequests | take 10"
+```
+
+El `workspace-id` corresponde al customer/workspace ID de Log Analytics, no al resource ID completo.
