@@ -46,14 +46,20 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 ## Fase 2 - Bootstrap Terraform
 
-- [ ] Crear estructura `infra/terraform`.
-- [ ] Crear `infra/terraform/bootstrap` para el backend remoto.
-- [ ] Crear script PowerShell o README operativo para crear backend con Azure CLI.
-- [ ] Crear resource group de estado Terraform.
-- [ ] Crear storage account de estado Terraform.
-- [ ] Crear blob container para `tfstate`.
-- [ ] Habilitar versionado/proteccion de estado si aplica.
-- [ ] Documentar comandos `terraform init`, `plan` y `apply`.
+- [x] Crear estructura `infra/terraform`.
+- [x] Crear `infra/terraform/bootstrap` para el backend remoto.
+- [x] Crear script PowerShell o README operativo para crear backend con Azure CLI.
+  - Artefactos creados: `infra/terraform/bootstrap/create-backend.ps1`, `infra/terraform/bootstrap/README.md`.
+- [x] Crear resource group de estado Terraform.
+  - Automatizado en script; no ejecutado aun para evitar crear recursos Azure sin confirmacion explicita.
+- [x] Crear storage account de estado Terraform.
+  - Automatizado en script; no ejecutado aun.
+- [x] Crear blob container para `tfstate`.
+  - Automatizado en script; no ejecutado aun.
+- [x] Habilitar versionado/proteccion de estado si aplica.
+  - Automatizado en script con versionado de blobs y retencion de borrado.
+- [x] Documentar comandos `terraform init`, `plan` y `apply`.
+  - Documentado en `infra/terraform/README.md`.
 
 ## Fase 3 - Modulos Terraform
 
