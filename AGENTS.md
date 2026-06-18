@@ -78,8 +78,9 @@ El despliegue vigente se esta migrando a GitHub Actions como unico CI/CD y Azure
 Repositorio GitHub:
 
 - Owner/repo: `compania-pari/CEROHUELLA_IA`
-- Rama de trabajo: `codex/github-azure-terraform-cicd`
-- PR actual: `https://github.com/compania-pari/CEROHUELLA_IA/pull/1`
+- Ramas permanentes: `develop` para integracion y `main` como rama estable.
+- Flujo vigente: push a `develop` despliega `dev`; PR `develop -> main` valida la promocion; merge a `main` despliega `qa` con aprobacion del environment.
+- `prod` queda pendiente/manual para siguiente etapa y no se ejecuta automaticamente desde `main`.
 - Remoto local principal para este trabajo: `github`
 
 Terraform:
@@ -145,6 +146,7 @@ Ambientes pendientes:
 - No borrar ni recrear recursos cloud sin confirmacion explicita del usuario. En DEV se elimino solamente `ca-cerohuella-api-dev` en estado fallido y luego Terraform lo recreo correctamente.
 - Al validar DEV o QA, confirmar tres cosas: workflow Terraform exitoso, recurso Azure `Succeeded/Running`, y `/health` con `HTTP 200`.
 - Despues de cada cambio documental o de infraestructura, actualizar `tareas.md` y subir el commit al PR para mantener trazabilidad.
+- No dejar ramas temporales remotas como parte del flujo oficial; si se usan para apoyo, integrarlas a `develop` y eliminar el remoto al terminar.
 
 ## Despliegue Azure DevOps Historico
 

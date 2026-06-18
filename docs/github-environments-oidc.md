@@ -9,8 +9,8 @@ Configurar GitHub como unico motor CI/CD para Cero Huella IA, usando GitHub Envi
 | Environment | Uso | Aprobacion |
 | --- | --- | --- |
 | `dev` | Despliegue automatico desde `develop`. | No requerida. |
-| `qa` | Promocion desde `main`. | Requerida. |
-| `prod` | Promocion final productiva. | Requerida. |
+| `qa` | Despliegue desde `main` despues del PR `develop -> main`. | Requerida. |
+| `prod` | Promocion final productiva pendiente. | Requerida antes de usarlo. |
 
 ## Plugin GitHub
 
@@ -92,8 +92,9 @@ Configurar como GitHub Environment variables o secrets:
 El workflow `.github/workflows/deploy.yml` usa los environments de GitHub como compuertas:
 
 - `develop` despliega automaticamente a `dev`.
-- `main` despliega a `qa` y luego promueve la misma imagen a `prod`.
-- `workflow_dispatch` permite desplegar manualmente a `dev`, `qa` o `prod`.
+- Pull request `develop -> main` ejecuta validaciones antes de promover.
+- `main` despliega a `qa` con aprobacion del environment `qa`.
+- `workflow_dispatch` permite desplegar manualmente a `dev`, `qa` o `prod`; `prod` queda reservado para la siguiente etapa.
 
 Cada despliegue:
 
@@ -104,7 +105,7 @@ Cada despliegue:
 5. Ejecuta smoke test contra `/health`.
 6. Publica imagen y URL en el resumen del workflow.
 
-El job de `prod` en el flujo de `main` no reconstruye la imagen; reutiliza la imagen validada en `qa`.
+`prod` no se ejecuta automaticamente desde `main` en esta etapa.
 
 ## Reglas de seguridad
 

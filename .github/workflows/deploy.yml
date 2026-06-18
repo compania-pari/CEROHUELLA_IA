@@ -28,7 +28,7 @@ env:
 jobs:
   deploy-dev:
     name: Deploy dev
-    if: github.event_name == 'push' && github.ref_name == 'develop' || github.event_name == 'workflow_dispatch' && inputs.environment == 'dev'
+    if: (github.event_name == 'push' && github.ref_name == 'develop') || (github.event_name == 'workflow_dispatch' && inputs.environment == 'dev')
     runs-on: ubuntu-24.04
     environment: dev
     timeout-minutes: 30
@@ -106,7 +106,7 @@ jobs:
 
   deploy-qa:
     name: Deploy qa
-    if: github.event_name == 'push' && github.ref_name == 'main' || github.event_name == 'workflow_dispatch' && inputs.environment == 'qa'
+    if: (github.event_name == 'push' && github.ref_name == 'main') || (github.event_name == 'workflow_dispatch' && inputs.environment == 'qa')
     runs-on: ubuntu-24.04
     environment: qa
     timeout-minutes: 30
@@ -179,62 +179,6 @@ jobs:
             echo "## CD qa"
             echo ""
             echo "- Image: ${{ steps.image.outputs.image }}"
-            echo "- URL: ${{ steps.smoke.outputs.url }}"
-          } >> "${GITHUB_STEP_SUMMARY}"
-
-  promote-prod:
-    name: Promote prod
-    needs: deploy-qa
-    if: github.event_name == 'push' && github.ref_name == 'main'
-    runs-on: ubuntu-24.04
-    environment: prod
-    timeout-minutes: 20
-    outputs:
-      url: ${{ steps.smoke.outputs.url }}
-
-    steps:
-      - name: Azure login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Deploy Container App
-        env:
-          IMAGE: ${{ needs.deploy-qa.outputs.image }}
-        run: |
-          az containerapp update \
-            --name "${CONTAINER_APP_PREFIX}-prod" \
-            --resource-group "${RESOURCE_GROUP_PREFIX}-prod" \
-            --image "${IMAGE}"
-
-      - name: Smoke test
-        id: smoke
-        run: |
-          fqdn="$(az containerapp show \
-            --name "${CONTAINER_APP_PREFIX}-prod" \
-            --resource-group "${RESOURCE_GROUP_PREFIX}-prod" \
-            --query properties.configuration.ingress.fqdn \
-            --output tsv)"
-          url="https://${fqdn}/health"
-          for attempt in {1..24}; do
-            if curl --fail --silent --show-error "${url}"; then
-              echo "url=https://${fqdn}" >> "${GITHUB_OUTPUT}"
-              exit 0
-            fi
-            echo "Waiting for healthy prod revision, attempt ${attempt}/24"
-            sleep 5
-          done
-          exit 1
-
-      - name: Job summary
-        if: always()
-        run: |
-          {
-            echo "## CD prod"
-            echo ""
-            echo "- Image: ${{ needs.deploy-qa.outputs.image }}"
             echo "- URL: ${{ steps.smoke.outputs.url }}"
           } >> "${GITHUB_STEP_SUMMARY}"
 

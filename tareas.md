@@ -21,7 +21,8 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 - [x] Configurar remoto GitHub hacia `https://github.com/compania-pari/CEROHUELLA_IA`.
 - [x] Verificar acceso al repositorio con el plugin `@github`.
   - Repositorio encontrado: `compania-pari/CEROHUELLA_IA`, publico, rama por defecto `main`, permisos de administracion y escritura disponibles. El repositorio esta vacio al momento de la verificacion.
-- [x] Crear rama de trabajo `codex/github-azure-terraform-cicd`.
+- [x] Crear rama de trabajo temporal `codex/github-azure-terraform-cicd`.
+  - Correccion posterior: esta rama no forma parte del flujo oficial; el remoto temporal fue eliminado y el flujo permanente queda en `develop` y `main`.
 - [x] Identificar cambios locales existentes para no sobrescribir trabajo previo.
 - [x] Definir si se conserva `develop` como rama de integracion o si todo parte desde `main`.
   - Decision inicial: conservar `develop` como rama de integracion y `main` como rama estable/release.
@@ -165,7 +166,7 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 - [x] Documentar como revisar planes antes de aplicar.
   - El workflow publica artifact `terraform-plan-{environment}` antes de aplicar.
 
-## Fase 9 - Workflow CD dev -> qa -> prod
+## Fase 9 - Workflow CD develop -> dev, main -> qa
 
 - [x] Crear `.github/workflows/deploy.yml`.
 - [x] Construir imagen con tag por SHA corto.
@@ -174,8 +175,9 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 - [x] Ejecutar smoke test contra `/health` en `dev`.
 - [x] Promover a `qa` con aprobacion manual.
 - [x] Ejecutar smoke test contra `/health` en `qa`.
-- [x] Promover a `prod` con aprobacion manual.
-- [x] Ejecutar smoke test contra `/health` en `prod`.
+- [ ] Promover a `prod` con aprobacion manual.
+  - Pendiente para siguiente etapa; el CD no ejecuta `prod` automaticamente desde `main`.
+- [ ] Ejecutar smoke test contra `/health` en `prod`.
 - [x] Publicar URLs finales por ambiente en el resumen del workflow.
 
 ## Fase 10 - Observabilidad basica Azure
@@ -255,12 +257,12 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 ## Fase 15 - Publicacion en GitHub
 
 - [x] Confirmar rama de trabajo.
-  - Rama: `codex/github-azure-terraform-cicd`.
+  - Rama temporal usada durante la implementacion inicial: `codex/github-azure-terraform-cicd`.
 - [x] Preparar commit con alcance claro.
   - Trabajo separado en commits por fase: Terraform, workflows, observabilidad, seguridad, documentacion y validacion.
 - [x] Subir rama a `compania-pari/CEROHUELLA_IA`.
   - Se publico `develop` como rama base porque el repositorio GitHub estaba vacio.
-  - Se publico `codex/github-azure-terraform-cicd` con tracking remoto.
+  - Se publico `codex/github-azure-terraform-cicd` con tracking remoto para el PR inicial; luego se integro a `develop` y se elimino del remoto para dejar solo ramas permanentes.
 - [x] Crear pull request con el plugin `@github`.
   - El conector `@github` devolvio `403 Resource not accessible by integration` al crear PR.
   - PR creado con `gh` autenticado como fallback autorizado en la sesion: https://github.com/compania-pari/CEROHUELLA_IA/pull/1
@@ -304,8 +306,8 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 ## Preguntas no bloqueantes para decidir durante la implementacion
 
-- [x] Definir si `dev` se despliega desde `develop` y `prod` desde `main`, o si se usa `main` con promocion manual.
-  - Decision inicial: `develop` despliega a `dev`; `main` promueve a `qa` y `prod` con aprobaciones.
+- [x] Definir flujo de ramas permanente.
+  - Decision corregida: `develop` despliega a `dev`; PR `develop -> main` valida la promocion; merge a `main` despliega a `qa` con aprobacion del environment. `prod` queda pendiente/manual para siguiente etapa.
 - [x] Definir si ACR sera compartido o uno por ambiente.
   - Decision inicial: ACR compartido.
 - [x] Definir si PostgreSQL sera servidor por ambiente o servidor unico con bases por ambiente.
@@ -317,7 +319,7 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 - [x] Infraestructura nueva definida en Terraform y validada.
 - [x] GitHub Actions ejecuta CI correctamente.
-- [ ] GitHub Actions despliega `dev -> qa -> prod` con aprobaciones.
+- [x] GitHub Actions despliega `develop -> dev` y `main -> qa` con aprobacion de `qa`.
 - [x] Imagen Docker se publica en ACR para `dev`.
 - [x] Imagen Docker se reutiliza desde ACR para `qa`.
 - [ ] Imagen Docker se publica/promueve para `prod`.

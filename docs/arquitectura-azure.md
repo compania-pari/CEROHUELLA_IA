@@ -6,11 +6,11 @@ Definir la arquitectura inicial para desplegar Cero Huella IA con GitHub Actions
 
 ## Alcance
 
-La arquitectura cubre tres ambientes:
+La arquitectura define tres ambientes, pero en esta etapa solo se aplican `dev` y `qa`:
 
 - `dev`: integracion continua y pruebas tecnicas.
 - `qa`: validacion previa con aprobacion manual.
-- `prod`: ambiente estable con aprobacion manual.
+- `prod`: ambiente estable con aprobacion manual, pendiente para la siguiente etapa.
 
 GitHub sera el unico motor CI/CD activo. Azure DevOps y AWS quedan como referencia historica de implementaciones previas.
 
@@ -18,14 +18,15 @@ GitHub sera el unico motor CI/CD activo. Azure DevOps y AWS quedan como referenc
 
 ```mermaid
 flowchart LR
-    DevBranch["develop"] --> CI["GitHub Actions CI"]
-    MainBranch["main"] --> CI
-    CI --> ACR["Azure Container Registry compartido"]
+    DevelopPush["push develop"] --> CIDev["GitHub Actions CI"]
+    CIDev --> ACR["Azure Container Registry compartido"]
     ACR --> Dev["Container App dev"]
-    Dev --> QaApproval["Aprobacion QA"]
+    DevelopMainPR["PR develop -> main"] --> CIPr["CI de validacion"]
+    CIPr --> MainMerge["merge main"]
+    MainMerge --> QaApproval["Aprobacion QA"]
     QaApproval --> Qa["Container App qa"]
-    Qa --> ProdApproval["Aprobacion prod"]
-    ProdApproval --> Prod["Container App prod"]
+    Qa -. "siguiente etapa" .-> ProdApproval["Aprobacion prod"]
+    ProdApproval -. "siguiente etapa" .-> Prod["Container App prod"]
     Dev --> PgDev["PostgreSQL dev"]
     Qa --> PgQa["PostgreSQL qa"]
     Prod --> PgProd["PostgreSQL prod"]
@@ -98,7 +99,7 @@ Nombre propuesto: `acrcerohuellashared`.
 Razon:
 
 - El pipeline construye una sola imagen por commit.
-- La misma imagen, preferentemente por digest o tag inmutable basado en SHA, se promueve de `dev` a `qa` y luego a `prod`.
+- La imagen se versiona con tag basado en SHA. En esta etapa `develop` despliega `dev` y `main` despliega `qa`; `prod` queda pendiente.
 - Reduce costo y evita duplicar imagenes entre ambientes.
 
 Acceso:
@@ -223,15 +224,14 @@ Aplicar estos tags a todos los recursos Terraform:
 Decision inicial:
 
 - `develop`: rama de integracion. Despliegue automatico a `dev`.
-- `main`: rama estable. Desde aqui se promueve con aprobaciones a `qa` y `prod`.
+- `main`: rama estable. Se actualiza mediante pull request desde `develop` y despliega a `qa` con aprobacion del environment.
 
 Promocion:
 
-1. Pull request hacia `develop`: CI obligatorio.
-2. Merge a `develop`: build, push de imagen y deploy a `dev`.
-3. Pull request de `develop` hacia `main`: CI obligatorio.
-4. Merge a `main`: deploy/promocion a `qa` con aprobacion.
-5. Aprobacion manual: promocion a `prod`.
+1. Push a `develop`: CI, build, push de imagen y deploy a `dev`.
+2. Pull request de `develop` hacia `main`: CI obligatorio de validacion.
+3. Merge a `main`: CI y deploy a `qa` con aprobacion del environment `qa`.
+4. `prod`: pendiente para siguiente etapa; no se ejecuta automaticamente desde `main`.
 
 ## Excepcion OECE sustentada
 

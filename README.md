@@ -60,8 +60,10 @@ pytest
 El flujo objetivo usa GitHub como unico CI/CD activo:
 
 ```text
-develop -> CI -> CD dev
-main -> CI -> aprobacion qa -> CD qa -> aprobacion prod -> CD prod
+push develop -> CI -> CD dev
+PR develop -> main -> CI
+merge main -> CI -> aprobacion qa -> CD qa
+prod -> pendiente/manual para siguiente etapa
 ```
 
 Documentacion operativa:
