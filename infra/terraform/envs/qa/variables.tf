@@ -122,6 +122,30 @@ variable "container_apps_environment_name" {
   default     = "cae-cerohuella-qa"
 }
 
+variable "create_container_apps_environment" {
+  description = "Whether QA creates its own Container Apps Environment. Disabled to keep academic subscription usage minimal."
+  type        = bool
+  default     = false
+}
+
+variable "existing_container_app_environment_id" {
+  description = "Existing Container Apps Environment ID reused by QA when create_container_apps_environment is false."
+  type        = string
+  default     = "/subscriptions/1043272f-49a4-48b9-8a42-18a70413117f/resourceGroups/rg-cerohuella-dev/providers/Microsoft.App/managedEnvironments/cae-cerohuella-dev"
+}
+
+variable "shared_container_apps_virtual_network_name" {
+  description = "Virtual network used by the shared Container Apps Environment."
+  type        = string
+  default     = "vnet-cerohuella-dev"
+}
+
+variable "shared_container_apps_virtual_network_resource_group_name" {
+  description = "Resource group of the virtual network used by the shared Container Apps Environment."
+  type        = string
+  default     = "rg-cerohuella-dev"
+}
+
 variable "managed_identity_name" {
   description = "Managed identity name."
   type        = string
