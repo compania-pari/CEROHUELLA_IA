@@ -184,9 +184,9 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 - [x] Conectar Container Apps Environment a Log Analytics.
 - [x] Crear Application Insights.
 - [x] Agregar `APPLICATIONINSIGHTS_CONNECTION_STRING` como secreto o variable segura.
-- [ ] Instrumentar FastAPI con Azure Monitor OpenTelemetry.
+- [x] Instrumentar FastAPI con Azure Monitor OpenTelemetry.
 - [x] Configurar nombre de servicio con `OTEL_SERVICE_NAME`.
-- [ ] Enviar logs de aplicacion a stdout en formato claro para Log Analytics.
+- [x] Enviar logs de aplicacion a stdout en formato claro para Log Analytics.
 - [x] Definir consultas KQL iniciales para requests, errores, excepciones y logs de contenedor.
 - [x] Crear alertas iniciales:
   - [x] API no saludable.
@@ -199,14 +199,14 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 ## Fase 11 - Cambios minimos en aplicacion
 
-- [ ] Agregar dependencias de OpenTelemetry/Azure Monitor en `pyproject.toml`.
-- [ ] Crear modulo de instrumentacion, por ejemplo `app/core/observability.py`.
-- [ ] Activar instrumentacion solo si existe `APPLICATIONINSIGHTS_CONNECTION_STRING`.
-- [ ] Instrumentar FastAPI sin romper pruebas locales.
-- [ ] Agregar request id/correlation id si no introduce riesgo excesivo.
-- [ ] Mantener `STORAGE_ROOT` en disco local como decision temporal.
-- [ ] No mover PDFs a Azure Files en esta etapa.
-- [ ] Actualizar pruebas si el cambio afecta inicializacion de la app.
+- [x] Agregar dependencias de OpenTelemetry/Azure Monitor en `pyproject.toml`.
+- [x] Crear modulo de instrumentacion, por ejemplo `app/core/observability.py`.
+- [x] Activar instrumentacion solo si existe `APPLICATIONINSIGHTS_CONNECTION_STRING`.
+- [x] Instrumentar FastAPI sin romper pruebas locales.
+- [x] Agregar request id/correlation id si no introduce riesgo excesivo.
+- [x] Mantener `STORAGE_ROOT` en disco local como decision temporal.
+- [x] No mover PDFs a Azure Files en esta etapa.
+- [x] Actualizar pruebas si el cambio afecta inicializacion de la app.
 
 ## Fase 12 - Seguridad y cumplimiento
 

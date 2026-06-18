@@ -36,7 +36,9 @@ Terraform inyecta:
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | Secret de Container App con el connection string de Application Insights. |
 | `OTEL_SERVICE_NAME` | Variable de entorno, con formato `cerohuella-api-{env}`. |
 
-La aplicacion debe activar OpenTelemetry solo cuando exista `APPLICATIONINSIGHTS_CONNECTION_STRING`. Esta parte se implementa como cambio de aplicacion en la Fase 11.
+La aplicacion activa OpenTelemetry solo cuando existe `APPLICATIONINSIGHTS_CONNECTION_STRING`. En local o pruebas, si la variable no esta configurada, la API mantiene logs a stdout y omite el exportador Azure Monitor.
+
+Tambien se agrega `X-Request-ID` en cada respuesta HTTP. Si el cliente envia `x-request-id`, se conserva; si no, la API genera un identificador nuevo.
 
 ## Alertas iniciales
 
@@ -136,4 +138,3 @@ La decision de canal final queda pendiente: correo, webhook, Teams u otro mecani
 3. Validar `/health`.
 4. Revisar `AppRequests` y `ContainerAppConsoleLogs_CL` en Log Analytics.
 5. Confirmar que las reglas de alerta quedan creadas en Azure Monitor.
-

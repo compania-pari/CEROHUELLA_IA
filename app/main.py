@@ -4,6 +4,7 @@ from fastapi.openapi.utils import get_openapi
 from app.api.v1.redactions import router as redactions_router
 from app.core.config import get_settings
 from app.core.gcp_credentials import configure_google_application_credentials
+from app.core.observability import configure_observability
 
 
 settings = get_settings()
@@ -15,6 +16,8 @@ app = FastAPI(
     description="API para anonimizar PDFs y auditar solicitudes realizadas4.",
 )
 app.openapi_version = "3.0.3"
+
+configure_observability(app, settings)
 
 app.include_router(redactions_router, prefix="/api/v1")
 
