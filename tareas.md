@@ -98,13 +98,20 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 ## Fase 5 - PostgreSQL y migraciones
 
-- [ ] Crear PostgreSQL Flexible Server nuevo desde Terraform.
-- [ ] Crear base de datos de la aplicacion por ambiente.
-- [ ] Definir reglas de red/firewall necesarias para Container Apps.
-- [ ] Definir usuario administrador sin exponer secretos.
-- [ ] Configurar `DATABASE_URL` como secreto por ambiente.
-- [ ] Evaluar si `alembic upgrade head` correra en pipeline o como paso operativo controlado.
-- [ ] Documentar procedimiento de migraciones.
+- [x] Crear PostgreSQL Flexible Server nuevo desde Terraform.
+  - Implementado en `infra/terraform/modules/postgresql_flexible_server` y ambientes `dev`, `qa`, `prod`.
+- [x] Crear base de datos de la aplicacion por ambiente.
+  - Base `cerohuella` creada por Terraform en cada ambiente.
+- [x] Definir reglas de red/firewall necesarias para Container Apps.
+  - Decision: PostgreSQL privado, VNet por ambiente, subnet delegada y DNS privado. Sin exposicion publica por defecto.
+- [x] Definir usuario administrador sin exponer secretos.
+  - Usuario parametrizado; password como variable sensible y placeholder en `*.tfvars.example`.
+- [x] Configurar `DATABASE_URL` como secreto por ambiente.
+  - Compuesto en Terraform y montado como secret env `DATABASE_URL`.
+- [x] Evaluar si `alembic upgrade head` correra en pipeline o como paso operativo controlado.
+  - Decision: ejecutar migraciones como paso controlado dentro de Azure, preferentemente con Container Apps Job, no desde Terraform.
+- [x] Documentar procedimiento de migraciones.
+  - Documentado en `docs/postgresql-migraciones.md`.
 
 ## Fase 6 - GitHub Environments y secretos
 
