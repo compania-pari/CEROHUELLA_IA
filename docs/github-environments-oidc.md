@@ -79,6 +79,11 @@ Configurar como GitHub Environment variables o secrets:
 | `GOOGLE_CLOUD_PROJECT_ID` | secret | ID de proyecto Google Cloud DLP. |
 | `GOOGLE_APPLICATION_CREDENTIALS_B64` | secret | JSON de service account en Base64. |
 | `POSTGRES_ADMIN_PASSWORD` | secret | Password por ambiente. |
+| `TFSTATE_RESOURCE_GROUP_NAME` | variable | Resource group del backend Terraform. |
+| `TFSTATE_STORAGE_ACCOUNT_NAME` | variable | Storage account del backend Terraform. |
+| `TFSTATE_CONTAINER_NAME` | variable | Container del backend Terraform, normalmente `tfstate`. |
+| `ACR_ID` | variable | ID del ACR compartido. No aplica para `shared`. |
+| `ACR_LOGIN_SERVER` | variable | Login server del ACR compartido. No aplica para `shared`. |
 
 `DATABASE_URL` no debe configurarse manualmente si Terraform lo compone y lo guarda como secret de Container App.
 
@@ -89,4 +94,3 @@ Configurar como GitHub Environment variables o secrets:
 - No usar password de ACR; usar managed identity con `AcrPull`.
 - En `qa` y `prod`, exigir aprobacion del environment.
 - Tratar el backend Terraform como sensible.
-

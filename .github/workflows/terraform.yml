@@ -1,0 +1,145 @@
+name: Terraform
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+    paths:
+      - "infra/terraform/**"
+  push:
+    branches:
+      - develop
+      - main
+    paths:
+      - "infra/terraform/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Terraform environment"
+        required: true
+        type: choice
+        options:
+          - shared
+          - dev
+          - qa
+          - prod
+      action:
+        description: "Terraform action"
+        required: true
+        type: choice
+        options:
+          - plan
+          - apply
+        default: plan
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  TERRAFORM_VERSION: "1.15.1"
+
+jobs:
+  fmt-validate:
+    name: Format and validate
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        environment:
+          - shared
+          - dev
+          - qa
+          - prod
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive infra/terraform
+
+      - name: Terraform init without backend
+        working-directory: infra/terraform/envs/${{ matrix.environment }}
+        run: terraform init -backend=false -input=false
+
+      - name: Terraform validate
+        working-directory: infra/terraform/envs/${{ matrix.environment }}
+        run: terraform validate
+
+  plan-apply:
+    name: Plan or apply
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    environment: ${{ inputs.environment }}
+
+    env:
+      TF_VAR_acr_id: ${{ vars.ACR_ID }}
+      TF_VAR_acr_login_server: ${{ vars.ACR_LOGIN_SERVER }}
+      TF_VAR_google_cloud_project_id: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
+      TF_VAR_google_application_credentials_b64: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_B64 }}
+      TF_VAR_postgres_admin_password: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Build backend config
+        working-directory: infra/terraform/envs/${{ inputs.environment }}
+        run: |
+          cat > backend.hcl <<EOF
+          resource_group_name  = "${{ vars.TFSTATE_RESOURCE_GROUP_NAME }}"
+          storage_account_name = "${{ vars.TFSTATE_STORAGE_ACCOUNT_NAME }}"
+          container_name       = "${{ vars.TFSTATE_CONTAINER_NAME }}"
+          key                  = "envs/${{ inputs.environment }}/terraform.tfstate"
+          EOF
+
+      - name: Terraform init
+        working-directory: infra/terraform/envs/${{ inputs.environment }}
+        run: terraform init -backend-config=backend.hcl -input=false
+
+      - name: Terraform plan
+        working-directory: infra/terraform/envs/${{ inputs.environment }}
+        run: terraform plan -input=false -out=tfplan
+
+      - name: Upload Terraform plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-${{ inputs.environment }}
+          path: infra/terraform/envs/${{ inputs.environment }}/tfplan
+          if-no-files-found: error
+
+      - name: Terraform apply
+        if: inputs.action == 'apply'
+        working-directory: infra/terraform/envs/${{ inputs.environment }}
+        run: terraform apply -input=false -auto-approve tfplan
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## Terraform"
+            echo ""
+            echo "- Environment: ${{ inputs.environment }}"
+            echo "- Action: ${{ inputs.action }}"
+            echo "- Backend key: envs/${{ inputs.environment }}/terraform.tfstate"
+          } >> "${GITHUB_STEP_SUMMARY}"
+

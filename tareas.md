@@ -153,15 +153,17 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 ## Fase 8 - Workflow Terraform
 
-- [ ] Crear `.github/workflows/terraform.yml`.
-- [ ] Ejecutar `terraform fmt -check`.
-- [ ] Ejecutar `terraform init`.
-- [ ] Ejecutar `terraform validate`.
-- [ ] Ejecutar `terraform plan`.
-- [ ] Permitir `terraform apply` por environment.
-- [ ] Separar ejecucion por `dev`, `qa` y `prod`.
-- [ ] Usar OIDC con `azure/login`.
-- [ ] Documentar como revisar planes antes de aplicar.
+- [x] Crear `.github/workflows/terraform.yml`.
+- [x] Ejecutar `terraform fmt -check`.
+- [x] Ejecutar `terraform init`.
+- [x] Ejecutar `terraform validate`.
+- [x] Ejecutar `terraform plan`.
+- [x] Permitir `terraform apply` por environment.
+- [x] Separar ejecucion por `dev`, `qa` y `prod`.
+  - Tambien soporta `shared` para ACR compartido.
+- [x] Usar OIDC con `azure/login`.
+- [x] Documentar como revisar planes antes de aplicar.
+  - El workflow publica artifact `terraform-plan-{environment}` antes de aplicar.
 
 ## Fase 9 - Workflow CD dev -> qa -> prod
 
