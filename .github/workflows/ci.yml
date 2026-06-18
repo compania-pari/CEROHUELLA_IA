@@ -45,6 +45,15 @@ jobs:
         run: |
           pytest --junitxml=pytest-results.xml
 
+      - name: Audit Python dependencies
+        continue-on-error: true
+        run: |
+          python -m pip install pip-audit
+          mkdir -p security-reports
+          pip-audit \
+            --format json \
+            --output security-reports/pip-audit.json
+
       - name: Upload pytest results
         uses: actions/upload-artifact@v4
         if: always()
@@ -95,4 +104,3 @@ jobs:
             echo "- Tests: pytest-results artifact"
             echo "- Security: security-reports artifact"
           } >> "${GITHUB_STEP_SUMMARY}"
-

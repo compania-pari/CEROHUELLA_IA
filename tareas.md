@@ -210,14 +210,15 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 
 ## Fase 12 - Seguridad y cumplimiento
 
-- [ ] Confirmar que `.env`, credenciales y PDFs siguen ignorados por Git.
-- [ ] Revisar que Terraform no exponga secretos en variables por defecto.
-- [ ] Usar variables sensibles en Terraform.
-- [ ] Evitar imprimir secretos en GitHub Actions.
-- [ ] Agregar Trivy al CI.
-- [ ] Evaluar `pip-audit` como paso no bloqueante o bloqueante.
-- [ ] Documentar riesgos residuales: almacenamiento local, min replicas, costos, firewall PostgreSQL.
-- [ ] Validar que la comunicacion publica use HTTPS administrado por Azure Container Apps.
+- [x] Confirmar que `.env`, credenciales y PDFs siguen ignorados por Git.
+- [x] Revisar que Terraform no exponga secretos en variables por defecto.
+- [x] Usar variables sensibles en Terraform.
+- [x] Evitar imprimir secretos en GitHub Actions.
+- [x] Agregar Trivy al CI.
+- [x] Evaluar `pip-audit` como paso no bloqueante o bloqueante.
+  - Decision inicial: `pip-audit` no bloqueante, con reporte JSON como artifact.
+- [x] Documentar riesgos residuales: almacenamiento local, min replicas, costos, firewall PostgreSQL.
+- [x] Validar que la comunicacion publica use HTTPS administrado por Azure Container Apps.
 
 ## Fase 13 - Documentacion
 
