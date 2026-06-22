@@ -256,3 +256,4 @@ override.tf.json
 contexto.md
 .codex
 .tmp/
+.tmp-azcfg/
