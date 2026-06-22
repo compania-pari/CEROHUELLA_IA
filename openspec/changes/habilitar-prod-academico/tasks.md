@@ -13,13 +13,14 @@
 ## 3. Validacion local
 
 - [x] 3.1 Ejecutar `terraform fmt` y `terraform validate` para `prod`.
-- [ ] 3.2 Ejecutar pruebas de aplicacion.
-  - Nota: `pytest` queda pendiente en CI porque esta sesion local bloqueo directorios temporales de pytest con `PermissionError`.
+- [x] 3.2 Ejecutar pruebas de aplicacion.
+  - Nota: `pytest` fallo localmente por permisos de temporales, pero paso en GitHub Actions CI.
 - [x] 3.3 Validar OpenSpec para `habilitar-prod-academico`.
 
 ## 4. Publicacion y despliegue
 
-- [ ] 4.1 Commit y push de los cambios a GitHub.
+- [x] 4.1 Commit y push de los cambios a GitHub.
 - [ ] 4.2 Ejecutar plan/apply de Terraform para `prod` usando GitHub Actions o Azure CLI.
+  - Bloqueado: el environment `prod` no tiene secrets `GOOGLE_CLOUD_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS_B64` ni `POSTGRES_ADMIN_PASSWORD`; no se cargaron valores falsos.
 - [ ] 4.3 Ejecutar CD manual hacia `prod`.
 - [ ] 4.4 Validar `/health` y observabilidad de `prod`.

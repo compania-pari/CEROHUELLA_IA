@@ -303,6 +303,7 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
   - Resultado: `HTTP 200` con `{"status":"ok"}`.
 - [ ] Ambiente `prod` aplicado con Terraform.
   - En implementacion como `prod` academico: reutiliza el Container Apps Environment de `dev`, mantiene PostgreSQL/Container App/observabilidad propios y usa compute minimo.
+  - Bloqueo actual: falta cargar secrets reales en GitHub environment `prod` antes de ejecutar Terraform apply (`GOOGLE_CLOUD_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS_B64`, `POSTGRES_ADMIN_PASSWORD`).
 
 ## Preguntas no bloqueantes para decidir durante la implementacion
 
