@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-06-22
+goal: Crear PROD reconstruible con Terraform y GitHub Actions sin exceder cuotas
+  ni costos académicos.

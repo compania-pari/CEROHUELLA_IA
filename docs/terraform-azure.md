@@ -68,6 +68,14 @@ terraform apply tfplan
 
 Repetir el mismo patron en `qa` y `prod` con su archivo `*.tfvars`.
 
+Nota para `prod` academico:
+
+- Por defecto `create_container_apps_environment = false`.
+- `existing_container_app_environment_id` reutiliza el Container Apps Environment de `dev`.
+- Terraform crea VNet peering y link de Private DNS para que el CAE compartido resuelva PostgreSQL `prod`.
+- Los valores por defecto son minimos: `0.5` CPU, `1Gi`, `min_replicas = 0`, `max_replicas = 1`.
+- Si una suscripcion con mas cuota requiere aislamiento completo, cambiar `create_container_apps_environment = true` y revisar costos antes de aplicar.
+
 ## GitHub Actions
 
 El workflow `.github/workflows/terraform.yml` permite:
@@ -115,4 +123,3 @@ terraform -chdir=infra\terraform\envs\qa validate
 terraform -chdir=infra\terraform\envs\prod init -backend=false
 terraform -chdir=infra\terraform\envs\prod validate
 ```
-

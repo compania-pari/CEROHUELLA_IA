@@ -176,7 +176,7 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 - [x] Promover a `qa` con aprobacion manual.
 - [x] Ejecutar smoke test contra `/health` en `qa`.
 - [ ] Promover a `prod` con aprobacion manual.
-  - Pendiente para siguiente etapa; el CD no ejecuta `prod` automaticamente desde `main`.
+  - Decision actual: `prod` queda manual por `workflow_dispatch` y environment `prod`; no se ejecuta automaticamente desde `main`.
 - [ ] Ejecutar smoke test contra `/health` en `prod`.
 - [x] Publicar URLs finales por ambiente en el resumen del workflow.
 
@@ -302,12 +302,12 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
   - URL: `https://ca-cerohuella-api-qa.gentleriver-3e399988.eastus2.azurecontainerapps.io/health`.
   - Resultado: `HTTP 200` con `{"status":"ok"}`.
 - [ ] Ambiente `prod` aplicado con Terraform.
-  - Pendiente de confirmacion del usuario por tiempo/costos.
+  - En implementacion como `prod` academico: reutiliza el Container Apps Environment de `dev`, mantiene PostgreSQL/Container App/observabilidad propios y usa compute minimo.
 
 ## Preguntas no bloqueantes para decidir durante la implementacion
 
 - [x] Definir flujo de ramas permanente.
-  - Decision corregida: `develop` despliega a `dev`; PR `develop -> main` valida la promocion; merge a `main` despliega a `qa` con aprobacion del environment. `prod` queda pendiente/manual para siguiente etapa.
+  - Decision corregida: `develop` despliega a `dev`; PR `develop -> main` valida la promocion; merge a `main` despliega a `qa` con aprobacion del environment. `prod` queda manual por `workflow_dispatch`.
 - [x] Definir si ACR sera compartido o uno por ambiente.
   - Decision inicial: ACR compartido.
 - [x] Definir si PostgreSQL sera servidor por ambiente o servidor unico con bases por ambiente.

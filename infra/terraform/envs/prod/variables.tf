@@ -122,6 +122,30 @@ variable "container_apps_environment_name" {
   default     = "cae-cerohuella-prod"
 }
 
+variable "create_container_apps_environment" {
+  description = "Whether prod creates its own Container Apps Environment. Disabled by default to keep academic subscription usage minimal."
+  type        = bool
+  default     = false
+}
+
+variable "existing_container_app_environment_id" {
+  description = "Existing Container Apps Environment ID reused by prod when create_container_apps_environment is false."
+  type        = string
+  default     = "/subscriptions/1043272f-49a4-48b9-8a42-18a70413117f/resourceGroups/rg-cerohuella-dev/providers/Microsoft.App/managedEnvironments/cae-cerohuella-dev"
+}
+
+variable "shared_container_apps_virtual_network_name" {
+  description = "Virtual network used by the shared Container Apps Environment."
+  type        = string
+  default     = "vnet-cerohuella-dev"
+}
+
+variable "shared_container_apps_virtual_network_resource_group_name" {
+  description = "Resource group of the virtual network used by the shared Container Apps Environment."
+  type        = string
+  default     = "rg-cerohuella-dev"
+}
+
 variable "managed_identity_name" {
   description = "Managed identity name."
   type        = string
@@ -137,25 +161,25 @@ variable "container_app_name" {
 variable "container_cpu" {
   description = "Container CPU."
   type        = number
-  default     = 1
+  default     = 0.5
 }
 
 variable "container_memory" {
   description = "Container memory."
   type        = string
-  default     = "2Gi"
+  default     = "1Gi"
 }
 
 variable "min_replicas" {
   description = "Minimum replicas."
   type        = number
-  default     = 1
+  default     = 0
 }
 
 variable "max_replicas" {
   description = "Maximum replicas."
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "app_name" {

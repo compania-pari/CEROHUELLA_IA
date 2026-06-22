@@ -80,7 +80,7 @@ Repositorio GitHub:
 - Owner/repo: `compania-pari/CEROHUELLA_IA`
 - Ramas permanentes: `develop` para integracion y `main` como rama estable.
 - Flujo vigente: push a `develop` despliega `dev`; PR `develop -> main` valida la promocion; merge a `main` despliega `qa` con aprobacion del environment.
-- `prod` queda pendiente/manual para siguiente etapa y no se ejecuta automaticamente desde `main`.
+- `prod` queda manual por `workflow_dispatch` y no se ejecuta automaticamente desde `main`.
 - Remoto local principal para este trabajo: `github`
 
 Terraform:
@@ -125,7 +125,7 @@ Recursos actuales aplicados:
 
 Ambientes pendientes:
 
-- `prod`: no aplicar sin confirmacion explicita del usuario.
+- `prod`: aplicar solo con confirmacion explicita del usuario. Para uso academico debe reutilizar el Container Apps Environment de `dev` y mantener compute minimo.
 
 ## Lecciones Aprendidas GitHub + Terraform + Azure
 
@@ -136,7 +136,7 @@ Ambientes pendientes:
   - Push a `develop`: ejecuta CI y CD solo hacia `dev`.
   - PR `develop -> main`: ejecuta validaciones de PR; no debe desplegar ambientes.
   - Merge a `main`: ejecuta CI y CD solo hacia `qa`.
-  - `prod`: queda pendiente/manual para una siguiente etapa.
+  - `prod`: se ejecuta solo manualmente con `workflow_dispatch`.
 - En la pantalla de PR, usar `base: main` y `compare: develop`. Esto significa integrar los cambios de `develop` hacia `main`.
 - En un PR, el CI valida instalacion de dependencias, import de FastAPI, `pytest`, build Docker, `pip-audit` y Trivy. Si falla, no promover a `main`.
 - Terraform automatico en PR/push solo corre cuando cambian archivos bajo `infra/terraform/**`; valida `terraform fmt`, `terraform init -backend=false` y `terraform validate` para `shared`, `dev`, `qa` y `prod`. No hace `plan`, no hace `apply` y no crea recursos.
@@ -156,6 +156,7 @@ Ambientes pendientes:
 - Si `az acr build` falla localmente por `UnicodeEncodeError` al transmitir logs en Windows, revisar el resultado con `az acr task list-runs` y validar tags con `az acr repository show-tags`.
 - Si Azure deja un Container App en `ProvisioningState=Failed`, Terraform puede no importarlo porque Azure bloquea la lectura de secretos con error `ResourceNotProvisioned`. En ese caso, si el recurso no tiene revision lista ni FQDN, pedir confirmacion y eliminar solo ese Container App fallido antes de relanzar `terraform apply`.
 - En esta suscripcion academica, Azure devolvio `MaxNumberOfRegionalEnvironmentsInSubExceeded`: no permite mas de 1 Container Apps Environment en `eastus2`. Para QA se reutilizo el CAE de DEV y se agrego VNet peering + Private DNS link hacia PostgreSQL QA.
+- Para PROD academico se debe seguir el mismo patron de QA: reutilizar `cae-cerohuella-dev`, crear VNet peering + Private DNS link hacia PostgreSQL PROD y mantener `min_replicas = 0`, `max_replicas = 1`, `0.5 CPU` y `1Gi`.
 - Si un ambiente reutiliza un CAE compartido, validar el `/health` y recordar que los logs de sistema del Container Apps Environment pertenecen al workspace asociado al CAE compartido; la telemetria de aplicacion sigue yendo a Application Insights del ambiente.
 - No borrar ni recrear recursos cloud sin confirmacion explicita del usuario. En DEV se elimino solamente `ca-cerohuella-api-dev` en estado fallido y luego Terraform lo recreo correctamente.
 - Al validar DEV o QA, confirmar tres cosas: workflow Terraform exitoso, recurso Azure `Succeeded/Running`, y `/health` con `HTTP 200`.

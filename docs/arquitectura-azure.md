@@ -6,11 +6,11 @@ Definir la arquitectura inicial para desplegar Cero Huella IA con GitHub Actions
 
 ## Alcance
 
-La arquitectura define tres ambientes, pero en esta etapa solo se aplican `dev` y `qa`:
+La arquitectura define tres ambientes. `dev` y `qa` ya operan como flujo automatico de integracion/promocion; `prod` se habilita como ambiente academico manual y de costo minimo:
 
 - `dev`: integracion continua y pruebas tecnicas.
 - `qa`: validacion previa con aprobacion manual.
-- `prod`: ambiente estable con aprobacion manual, pendiente para la siguiente etapa.
+- `prod`: ambiente final academico, con despliegue manual, recursos minimos y aprobacion del environment.
 
 GitHub sera el unico motor CI/CD activo. Azure DevOps y AWS quedan como referencia historica de implementaciones previas.
 
@@ -25,8 +25,8 @@ flowchart LR
     CIPr --> MainMerge["merge main"]
     MainMerge --> QaApproval["Aprobacion QA"]
     QaApproval --> Qa["Container App qa"]
-    Qa -. "siguiente etapa" .-> ProdApproval["Aprobacion prod"]
-    ProdApproval -. "siguiente etapa" .-> Prod["Container App prod"]
+    Qa -. "workflow_dispatch" .-> ProdApproval["Aprobacion prod"]
+    ProdApproval -. "manual" .-> Prod["Container App prod"]
     Dev --> PgDev["PostgreSQL dev"]
     Qa --> PgQa["PostgreSQL qa"]
     Prod --> PgProd["PostgreSQL prod"]
@@ -99,7 +99,7 @@ Nombre propuesto: `acrcerohuellashared`.
 Razon:
 
 - El pipeline construye una sola imagen por commit.
-- La imagen se versiona con tag basado en SHA. En esta etapa `develop` despliega `dev` y `main` despliega `qa`; `prod` queda pendiente.
+- La imagen se versiona con tag basado en SHA. `develop` despliega `dev`, `main` despliega `qa` y `prod` se despliega solo manualmente.
 - Reduce costo y evita duplicar imagenes entre ambientes.
 
 Acceso:
@@ -114,12 +114,14 @@ Servicio objetivo: Azure Container Apps.
 
 Cada ambiente tendra:
 
-- Un Container Apps Environment.
+- Un Container Apps Environment propio o compartido segun cuota/costo.
 - Una Container App para la API FastAPI.
 - Ingress externo HTTPS para exponer `/health`, `/docs` y endpoints de API.
-- Min replicas inicial: `0` para `dev` y `qa`; `1` para `prod` si el costo lo permite.
-- Max replicas inicial: `1` o `2` segun ambiente.
-- CPU/memoria inicial: `0.5 vCPU / 1Gi` para `dev` y `qa`; `1 vCPU / 2Gi` para `prod` si las pruebas de PDF lo requieren.
+- Min replicas inicial: `0` para `dev`, `qa` y `prod` academico.
+- Max replicas inicial: `1`.
+- CPU/memoria inicial: `0.5 vCPU / 1Gi` para `dev`, `qa` y `prod` academico.
+
+Por cuota/costo academico, `qa` y `prod` pueden reutilizar el Container Apps Environment de `dev` (`cae-cerohuella-dev`) y conectarse a sus PostgreSQL privados mediante VNet peering y Private DNS link. Esto reduce aislamiento de plataforma, pero conserva Container App, PostgreSQL, identidad y observabilidad separadas por ambiente.
 
 El almacenamiento de PDFs se mantiene en disco local por decision de esta etapa. Riesgo aceptado: los archivos se pierden ante recreacion, reinicio o cambio de replica. Este riesgo debe quedar documentado hasta migrar a Azure Files o Blob Storage.
 
@@ -231,7 +233,7 @@ Promocion:
 1. Push a `develop`: CI, build, push de imagen y deploy a `dev`.
 2. Pull request de `develop` hacia `main`: CI obligatorio de validacion.
 3. Merge a `main`: CI y deploy a `qa` con aprobacion del environment `qa`.
-4. `prod`: pendiente para siguiente etapa; no se ejecuta automaticamente desde `main`.
+4. `prod`: despliegue manual por `workflow_dispatch` y environment `prod`; no se ejecuta automaticamente desde `main`.
 
 ## Excepcion OECE sustentada
 

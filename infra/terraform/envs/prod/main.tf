@@ -18,6 +18,41 @@ module "network" {
   tags                           = local.common_tags
 }
 
+data "azurerm_virtual_network" "shared_container_apps" {
+  count = var.create_container_apps_environment ? 0 : 1
+
+  name                = var.shared_container_apps_virtual_network_name
+  resource_group_name = var.shared_container_apps_virtual_network_resource_group_name
+}
+
+resource "azurerm_virtual_network_peering" "prod_to_shared_container_apps" {
+  count = var.create_container_apps_environment ? 0 : 1
+
+  name                      = "peer-${var.virtual_network_name}-to-${var.shared_container_apps_virtual_network_name}"
+  resource_group_name       = module.resource_group.name
+  virtual_network_name      = module.network.virtual_network_name
+  remote_virtual_network_id = data.azurerm_virtual_network.shared_container_apps[0].id
+  allow_forwarded_traffic   = true
+
+  depends_on = [
+    module.network
+  ]
+}
+
+resource "azurerm_virtual_network_peering" "shared_container_apps_to_prod" {
+  count = var.create_container_apps_environment ? 0 : 1
+
+  name                      = "peer-${var.shared_container_apps_virtual_network_name}-to-${var.virtual_network_name}"
+  resource_group_name       = var.shared_container_apps_virtual_network_resource_group_name
+  virtual_network_name      = data.azurerm_virtual_network.shared_container_apps[0].name
+  remote_virtual_network_id = module.network.virtual_network_id
+  allow_forwarded_traffic   = true
+
+  depends_on = [
+    module.network
+  ]
+}
+
 module "log_analytics" {
   source              = "../../modules/log_analytics"
   name                = var.log_analytics_name
@@ -37,6 +72,8 @@ module "application_insights" {
 }
 
 module "container_apps_environment" {
+  count = var.create_container_apps_environment ? 1 : 0
+
   source                     = "../../modules/container_apps_environment"
   name                       = var.container_apps_environment_name
   resource_group_name        = module.resource_group.name
@@ -73,11 +110,28 @@ module "postgresql" {
   tags                   = local.common_tags
 }
 
+resource "azurerm_private_dns_zone_virtual_network_link" "postgresql_shared_container_apps" {
+  count = var.create_container_apps_environment ? 0 : 1
+
+  name                  = "${var.postgresql_server_name}-shared-cae-vnet-link"
+  resource_group_name   = module.resource_group.name
+  private_dns_zone_name = var.postgresql_private_dns_zone_name
+  virtual_network_id    = data.azurerm_virtual_network.shared_container_apps[0].id
+  registration_enabled  = false
+  tags                  = local.common_tags
+
+  depends_on = [
+    module.postgresql,
+    azurerm_virtual_network_peering.prod_to_shared_container_apps,
+    azurerm_virtual_network_peering.shared_container_apps_to_prod
+  ]
+}
+
 module "container_app" {
   source                       = "../../modules/container_app"
   name                         = var.container_app_name
   resource_group_name          = module.resource_group.name
-  container_app_environment_id = module.container_apps_environment.id
+  container_app_environment_id = local.container_app_environment_id
   identity_id                  = module.managed_identity.id
   registry_server              = var.acr_login_server
   image                        = local.image

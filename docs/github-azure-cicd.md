@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Usar GitHub Actions como unico motor CI/CD para Cero Huella IA, desplegando en Azure Container Apps con promocion controlada desde `develop` hacia `main`. En esta etapa el alcance operativo llega hasta `qa`; `prod` queda manual y pendiente para una siguiente etapa.
+Usar GitHub Actions como unico motor CI/CD para Cero Huella IA, desplegando en Azure Container Apps con promocion controlada desde `develop` hacia `main`. `prod` queda habilitado solo como despliegue manual academico.
 
 ## Ramas
 
@@ -60,7 +60,18 @@ push main
  -> smoke test /health
 ```
 
-`prod` no se ejecuta automaticamente desde `main` en esta etapa. El workflow conserva una entrada manual `workflow_dispatch` para `prod`, pero no debe usarse hasta que se confirme la infraestructura productiva.
+`prod` no se ejecuta automaticamente desde `main`. El workflow conserva una entrada manual `workflow_dispatch` para `prod`; debe usarse solo cuando la infraestructura `prod` haya sido aplicada y aprobada.
+
+### `prod` manual academico
+
+```text
+workflow_dispatch environment=prod
+ -> aprobacion environment prod
+ -> build imagen con tag SHA corto
+ -> push a ACR
+ -> despliegue prod
+ -> smoke test /health
+```
 
 ## Variables GitHub
 
@@ -118,6 +129,7 @@ Trabajo diario en develop
  -> merge a main
  -> CI
  -> CD qa con aprobacion del environment qa
+ -> CD prod solo manual, si se requiere demostracion final
 ```
 
 No se considera una rama temporal remota como parte del flujo oficial. Si se crea una rama local de apoyo, debe integrarse a `develop` y eliminarse del remoto cuando termine.
