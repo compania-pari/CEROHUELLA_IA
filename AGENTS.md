@@ -132,6 +132,20 @@ Ambientes pendientes:
 - Usar `gh` como fallback operativo cuando el conector `@github` no permita alguna accion. En esta migracion, el conector devolvio `403 Resource not accessible by integration` al crear el PR.
 - GitHub Actions usa OIDC contra Azure. No cargar secretos de Azure tipo client secret si OIDC ya esta configurado.
 - Cargar secretos por GitHub Environments. Para Google DLP usar `GOOGLE_APPLICATION_CREDENTIALS_B64`, no JSON crudo.
+- Flujo oficial probado:
+  - Push a `develop`: ejecuta CI y CD solo hacia `dev`.
+  - PR `develop -> main`: ejecuta validaciones de PR; no debe desplegar ambientes.
+  - Merge a `main`: ejecuta CI y CD solo hacia `qa`.
+  - `prod`: queda pendiente/manual para una siguiente etapa.
+- En la pantalla de PR, usar `base: main` y `compare: develop`. Esto significa integrar los cambios de `develop` hacia `main`.
+- En un PR, el CI valida instalacion de dependencias, import de FastAPI, `pytest`, build Docker, `pip-audit` y Trivy. Si falla, no promover a `main`.
+- Terraform automatico en PR/push solo corre cuando cambian archivos bajo `infra/terraform/**`; valida `terraform fmt`, `terraform init -backend=false` y `terraform validate` para `shared`, `dev`, `qa` y `prod`. No hace `plan`, no hace `apply` y no crea recursos.
+- Terraform real se ejecuta manualmente desde GitHub Actions con `workflow_dispatch` en el workflow `Terraform`, eligiendo `environment` y `action` (`plan` o `apply`). `apply` puede crear o modificar recursos Azure.
+- El job `Plan or apply` en el workflow Terraform aparece como `skipped` cuando no es `workflow_dispatch`; eso es correcto.
+- Tras el merge del PR `develop -> main`, el CD de `main` debe mostrar `Deploy dev` como `skipped`, `Deploy qa` como `success` y `Deploy prod manually` como `skipped`.
+- Para validar observabilidad, generar trafico contra `/health` y revisar Application Insights. En Azure en espanol, usar `Application Insights > Buscar` o `Investigacion > Busqueda de transacciones`; si solo aparece `View as: Traces`, los traces tambien sirven como evidencia de telemetria.
+- Un `trace` es un evento o mensaje tecnico generado por la aplicacion; complementa a las `requests`, excepciones y metricas para diagnosticar comportamiento.
+- La telemetria de Application Insights puede tardar algunos minutos en aparecer despues de generar trafico.
 - En Azure Container Apps, la subnet debe tener delegacion a `Microsoft.App/environments`; sin eso falla la creacion del Container Apps Environment.
 - Usar `eastus2` como region runtime. PostgreSQL Flexible Server fallo en `eastus` por `LocationIsOfferRestricted`.
 - Mantener nombres con sufijo `eus2` cuando sea necesario para evitar conflictos de nombres reservados o recursos en soft-delete:
