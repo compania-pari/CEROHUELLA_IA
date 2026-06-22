@@ -175,9 +175,10 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 - [x] Ejecutar smoke test contra `/health` en `dev`.
 - [x] Promover a `qa` con aprobacion manual.
 - [x] Ejecutar smoke test contra `/health` en `qa`.
-- [ ] Promover a `prod` con aprobacion manual.
+- [x] Promover a `prod` con aprobacion manual.
   - Decision actual: `prod` queda manual por `workflow_dispatch` y environment `prod`; no se ejecuta automaticamente desde `main`.
-- [ ] Ejecutar smoke test contra `/health` en `prod`.
+  - Ejecutado con workflow `CD`, run `27985079578`.
+- [x] Ejecutar smoke test contra `/health` en `prod`.
 - [x] Publicar URLs finales por ambiente en el resumen del workflow.
 
 ## Fase 10 - Observabilidad basica Azure
@@ -301,9 +302,19 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 - [x] Verificacion `qa` contra `/health`.
   - URL: `https://ca-cerohuella-api-qa.gentleriver-3e399988.eastus2.azurecontainerapps.io/health`.
   - Resultado: `HTTP 200` con `{"status":"ok"}`.
-- [ ] Ambiente `prod` aplicado con Terraform.
-  - En implementacion como `prod` academico: reutiliza el Container Apps Environment de `dev`, mantiene PostgreSQL/Container App/observabilidad propios y usa compute minimo.
-  - Bloqueo actual: falta cargar secrets reales en GitHub environment `prod` antes de ejecutar Terraform apply (`GOOGLE_CLOUD_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS_B64`, `POSTGRES_ADMIN_PASSWORD`).
+- [x] Ambiente `prod` aplicado con Terraform.
+  - Resource group: `rg-cerohuella-prod`.
+  - Container App: `ca-cerohuella-api-prod`.
+  - PostgreSQL Flexible Server: `psql-cerohuella-prod`.
+  - Log Analytics: `law-cerohuella-prod`.
+  - Application Insights: `appi-cerohuella-prod`.
+  - Alertas basicas de Azure Monitor creadas para API y PostgreSQL.
+  - Por cuota/costo academico, PROD reutiliza el Container Apps Environment `cae-cerohuella-dev` y se conecta a PostgreSQL PROD mediante VNet peering y Private DNS link.
+- [x] Verificacion `prod` contra `/health`.
+  - URL: `https://ca-cerohuella-api-prod.gentleriver-3e399988.eastus2.azurecontainerapps.io/health`.
+  - Resultado: smoke test exitoso en GitHub Actions `Apply prod academic` y `CD`.
+- [x] Observabilidad `prod` validada.
+  - Log Analytics `law-cerohuella-prod` recibio datos recientes en `AppTraces`, `AppPerformanceCounters` y `AppMetrics`.
 
 ## Preguntas no bloqueantes para decidir durante la implementacion
 
@@ -323,18 +334,18 @@ Llevar Cero Huella IA a un flujo CI/CD basado en GitHub Actions, provisionar inf
 - [x] GitHub Actions despliega `develop -> dev` y `main -> qa` con aprobacion de `qa`.
 - [x] Imagen Docker se publica en ACR para `dev`.
 - [x] Imagen Docker se reutiliza desde ACR para `qa`.
-- [ ] Imagen Docker se publica/promueve para `prod`.
+- [x] Imagen Docker se publica/promueve para `prod`.
 - [x] Container App responde `/health` en `dev`.
 - [x] Container App responde `/health` en `qa`.
-- [ ] Container App responde `/health` en `prod`.
+- [x] Container App responde `/health` en `prod`.
 - [x] PostgreSQL nuevo queda provisionado para `dev`.
 - [x] PostgreSQL nuevo queda provisionado para `qa`.
-- [ ] PostgreSQL nuevo queda provisionado para `prod`.
+- [x] PostgreSQL nuevo queda provisionado para `prod`.
 - [x] Observabilidad basica creada en Azure Monitor/Application Insights para `dev`.
 - [x] Observabilidad basica creada en Azure Monitor/Application Insights para `qa`.
-- [ ] Observabilidad basica creada en Azure Monitor/Application Insights para `prod`.
+- [x] Observabilidad basica creada en Azure Monitor/Application Insights para `prod`.
 - [x] Alertas basicas creadas para `dev`.
 - [x] Alertas basicas creadas para `qa`.
-- [ ] Alertas basicas creadas para `prod`.
+- [x] Alertas basicas creadas para `prod`.
 - [x] Documentacion operativa completa.
 - [x] Codigo publicado en `compania-pari/CEROHUELLA_IA`.

@@ -20,7 +20,10 @@
 ## 4. Publicacion y despliegue
 
 - [x] 4.1 Commit y push de los cambios a GitHub.
-- [ ] 4.2 Ejecutar plan/apply de Terraform para `prod` usando GitHub Actions o Azure CLI.
-  - Bloqueado: el environment `prod` no tiene secrets `GOOGLE_CLOUD_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS_B64` ni `POSTGRES_ADMIN_PASSWORD`; no se cargaron valores falsos.
-- [ ] 4.3 Ejecutar CD manual hacia `prod`.
-- [ ] 4.4 Validar `/health` y observabilidad de `prod`.
+- [x] 4.2 Ejecutar plan/apply de Terraform para `prod` usando GitHub Actions o Azure CLI.
+  - Ejecutado con GitHub Actions `Apply prod academic`, run `27984330832`.
+- [x] 4.3 Ejecutar CD manual hacia `prod`.
+  - Ejecutado con workflow `CD`, run `27985079578`.
+- [x] 4.4 Validar `/health` y observabilidad de `prod`.
+  - `/health` validado por smoke test de GitHub Actions.
+  - Observabilidad validada en Log Analytics `law-cerohuella-prod` con datos recientes en `AppTraces`, `AppPerformanceCounters` y `AppMetrics`.
