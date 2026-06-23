@@ -80,7 +80,7 @@ Repositorio GitHub:
 - Owner/repo: `compania-pari/CEROHUELLA_IA`
 - Ramas permanentes: `develop` para integracion y `main` como rama estable.
 - Flujo vigente: push a `develop` despliega `dev`; PR `develop -> main` valida la promocion; merge a `main` despliega `qa` con aprobacion del environment.
-- `prod` queda pendiente/manual para siguiente etapa y no se ejecuta automaticamente desde `main`.
+- `prod` queda manual por `workflow_dispatch` y no se ejecuta automaticamente desde `main`.
 - Remoto local principal para este trabajo: `github`
 
 Terraform:
@@ -122,16 +122,38 @@ Recursos actuales aplicados:
   - Application Insights: `appi-cerohuella-qa`
   - Observabilidad: alertas basicas de API, Container App y PostgreSQL creadas por Terraform.
   - Para mantener costos/cuotas academicas, QA reutiliza el Container Apps Environment `cae-cerohuella-dev` y se conecta a PostgreSQL QA con VNet peering y Private DNS link.
-
-Ambientes pendientes:
-
-- `prod`: no aplicar sin confirmacion explicita del usuario.
+- PROD:
+  - Resource group: `rg-cerohuella-prod`
+  - Region runtime: `eastus2`
+  - Container App: `ca-cerohuella-api-prod`
+  - URL PROD: `https://ca-cerohuella-api-prod.gentleriver-3e399988.eastus2.azurecontainerapps.io`
+  - Health PROD: `https://ca-cerohuella-api-prod.gentleriver-3e399988.eastus2.azurecontainerapps.io/health`
+  - PostgreSQL Flexible Server: `psql-cerohuella-prod`
+  - Database: `cerohuella`
+  - Log Analytics: `law-cerohuella-prod`
+  - Application Insights: `appi-cerohuella-prod`
+  - Observabilidad: alertas basicas de API, Container App y PostgreSQL creadas por Terraform.
+  - Para mantener costos/cuotas academicas, PROD reutiliza el Container Apps Environment `cae-cerohuella-dev`, usa `0.5 CPU`, `1Gi`, `min_replicas = 0` y `max_replicas = 1`, y se conecta a PostgreSQL PROD con VNet peering y Private DNS link.
 
 ## Lecciones Aprendidas GitHub + Terraform + Azure
 
 - Usar `gh` como fallback operativo cuando el conector `@github` no permita alguna accion. En esta migracion, el conector devolvio `403 Resource not accessible by integration` al crear el PR.
 - GitHub Actions usa OIDC contra Azure. No cargar secretos de Azure tipo client secret si OIDC ya esta configurado.
 - Cargar secretos por GitHub Environments. Para Google DLP usar `GOOGLE_APPLICATION_CREDENTIALS_B64`, no JSON crudo.
+- Flujo oficial probado:
+  - Push a `develop`: ejecuta CI y CD solo hacia `dev`.
+  - PR `develop -> main`: ejecuta validaciones de PR; no debe desplegar ambientes.
+  - Merge a `main`: ejecuta CI y CD solo hacia `qa`.
+  - `prod`: se ejecuta solo manualmente con `workflow_dispatch`.
+- En la pantalla de PR, usar `base: main` y `compare: develop`. Esto significa integrar los cambios de `develop` hacia `main`.
+- En un PR, el CI valida instalacion de dependencias, import de FastAPI, `pytest`, build Docker, `pip-audit` y Trivy. Si falla, no promover a `main`.
+- Terraform automatico en PR/push solo corre cuando cambian archivos bajo `infra/terraform/**`; valida `terraform fmt`, `terraform init -backend=false` y `terraform validate` para `shared`, `dev`, `qa` y `prod`. No hace `plan`, no hace `apply` y no crea recursos.
+- Terraform real se ejecuta manualmente desde GitHub Actions con `workflow_dispatch` en el workflow `Terraform`, eligiendo `environment` y `action` (`plan` o `apply`). `apply` puede crear o modificar recursos Azure.
+- El job `Plan or apply` en el workflow Terraform aparece como `skipped` cuando no es `workflow_dispatch`; eso es correcto.
+- Tras el merge del PR `develop -> main`, el CD de `main` debe mostrar `Deploy dev` como `skipped`, `Deploy qa` como `success` y `Deploy prod manually` como `skipped`.
+- Para validar observabilidad, generar trafico contra `/health` y revisar Application Insights. En Azure en espanol, usar `Application Insights > Buscar` o `Investigacion > Busqueda de transacciones`; si solo aparece `View as: Traces`, los traces tambien sirven como evidencia de telemetria.
+- Un `trace` es un evento o mensaje tecnico generado por la aplicacion; complementa a las `requests`, excepciones y metricas para diagnosticar comportamiento.
+- La telemetria de Application Insights puede tardar algunos minutos en aparecer despues de generar trafico.
 - En Azure Container Apps, la subnet debe tener delegacion a `Microsoft.App/environments`; sin eso falla la creacion del Container Apps Environment.
 - Usar `eastus2` como region runtime. PostgreSQL Flexible Server fallo en `eastus` por `LocationIsOfferRestricted`.
 - Mantener nombres con sufijo `eus2` cuando sea necesario para evitar conflictos de nombres reservados o recursos en soft-delete:
@@ -142,6 +164,14 @@ Ambientes pendientes:
 - Si `az acr build` falla localmente por `UnicodeEncodeError` al transmitir logs en Windows, revisar el resultado con `az acr task list-runs` y validar tags con `az acr repository show-tags`.
 - Si Azure deja un Container App en `ProvisioningState=Failed`, Terraform puede no importarlo porque Azure bloquea la lectura de secretos con error `ResourceNotProvisioned`. En ese caso, si el recurso no tiene revision lista ni FQDN, pedir confirmacion y eliminar solo ese Container App fallido antes de relanzar `terraform apply`.
 - En esta suscripcion academica, Azure devolvio `MaxNumberOfRegionalEnvironmentsInSubExceeded`: no permite mas de 1 Container Apps Environment en `eastus2`. Para QA se reutilizo el CAE de DEV y se agrego VNet peering + Private DNS link hacia PostgreSQL QA.
+- Para PROD academico se debe seguir el mismo patron de QA: reutilizar `cae-cerohuella-dev`, crear VNet peering + Private DNS link hacia PostgreSQL PROD y mantener `min_replicas = 0`, `max_replicas = 1`, `0.5 CPU` y `1Gi`.
+- PROD academico quedo aplicado con Terraform y CD manual. Para no revelar ni copiar el valor de `GOOGLE_APPLICATION_CREDENTIALS_B64`, el apply inicial reutilizo los secrets Google del environment `dev` dentro de un workflow temporal y creo un password nuevo para PostgreSQL PROD como secret de repositorio.
+- Para futuros `terraform apply` del workflow oficial `Terraform` sobre `prod`, cargar tambien en el GitHub environment `prod` los secrets `GOOGLE_CLOUD_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS_B64` y `POSTGRES_ADMIN_PASSWORD`, o repetir un mecanismo temporal equivalente sin imprimir valores.
+- El workflow temporal `Copy prod secrets` fallo porque `GITHUB_TOKEN` no puede administrar secrets de environments (`403 Resource not accessible by integration`). No usar ese patron salvo que se autorice un token con permisos suficientes y se elimine despues.
+- En esta sesion local, `gh run view --log` fallo por permisos de cache en `C:\Users\lpari\AppData\Local\GitHub CLI`; usar `gh api repos/{owner}/{repo}/actions/jobs/{job_id}/logs` como alternativa.
+- En esta sesion local, `curl.exe` fallo con `SEC_E_NO_CREDENTIALS`; tomar como evidencia primaria el smoke test de GitHub Actions o validar desde Azure/GitHub Actions si Windows local presenta ese error.
+- Para validar observabilidad PROD sin instalar extensiones Azure CLI, usar `az rest` contra Log Analytics. La consulta amplia `search * | where TimeGenerated > ago(2h) | summarize Count=count() by $table` confirmo datos en `AppTraces`, `AppPerformanceCounters` y `AppMetrics`.
+- En esta sandbox, Azure CLI puede fallar con `Permission denied: C:\Users\lpari\.azure\az.sess`; si ocurre, usar GitHub Actions o una terminal local normal del usuario para leer/copiar secretos desde Azure.
 - Si un ambiente reutiliza un CAE compartido, validar el `/health` y recordar que los logs de sistema del Container Apps Environment pertenecen al workspace asociado al CAE compartido; la telemetria de aplicacion sigue yendo a Application Insights del ambiente.
 - No borrar ni recrear recursos cloud sin confirmacion explicita del usuario. En DEV se elimino solamente `ca-cerohuella-api-dev` en estado fallido y luego Terraform lo recreo correctamente.
 - Al validar DEV o QA, confirmar tres cosas: workflow Terraform exitoso, recurso Azure `Succeeded/Running`, y `/health` con `HTTP 200`.

@@ -254,3 +254,6 @@ override.tf.json
 *_override.tf.json
 #AGENTS.md
 contexto.md
+.codex
+.tmp/
+.tmp-azcfg/
